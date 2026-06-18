@@ -47,6 +47,17 @@ export const TASTE_AXES = [
 
 export type TasteAxis = (typeof TASTE_AXES)[number]["key"];
 
+// The five flavor axes plotted on the radar (overall is the star score, separate).
+export const FLAVOR_AXES = [
+  "acidity",
+  "body",
+  "sweetness",
+  "bitterness",
+  "clarity",
+] as const;
+
+export type FlavorAxis = (typeof FLAVOR_AXES)[number];
+
 // A tint per roast level so bean cards are scannable at a glance.
 export const ROAST_TINT: Record<string, string> = {
   Light: "#E8C77A",

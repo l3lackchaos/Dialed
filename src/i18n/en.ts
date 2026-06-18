@@ -110,6 +110,13 @@ export const en = {
   "tasting.phNotes": "Floral and sweet, a touch sour for me…",
   "tasting.errName": "Add your name first",
   "tasting.added": "Tasting added",
+  "tasting.flavor": "Flavor",
+  "taste.acidity": "Acidity",
+  "taste.body": "Body",
+  "taste.sweetness": "Sweetness",
+  "taste.bitterness": "Bitterness",
+  "taste.clarity": "Clarity",
+  "session.flavorProfile": "Flavor profile",
 
   // Tastings tab
   "tastings.title": "Tastings",

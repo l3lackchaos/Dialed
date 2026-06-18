@@ -106,6 +106,13 @@ export const th: Record<keyof typeof en, string> = {
   "tasting.phNotes": "หอมดอกไม้ หวาน เปรี้ยวไปนิดสำหรับเรา…",
   "tasting.errName": "ใส่ชื่อก่อนนะ",
   "tasting.added": "เพิ่มรสแล้ว",
+  "tasting.flavor": "รสชาติ",
+  "taste.acidity": "เปรี้ยว",
+  "taste.body": "บอดี้",
+  "taste.sweetness": "หวาน",
+  "taste.bitterness": "ขม",
+  "taste.clarity": "ใส",
+  "session.flavorProfile": "โปรไฟล์รสชาติ",
 
   "tastings.title": "รอบชิม",
   "tastings.empty": "ยังไม่มีรอบชิม เปิดสูตรแล้วเริ่มรอบได้เลย",

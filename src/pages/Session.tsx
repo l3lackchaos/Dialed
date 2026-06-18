@@ -7,8 +7,10 @@ import { fetchSession, fetchTastings, createTasting, deleteTasting } from "../li
 import { formatDate } from "../lib/format";
 import { PageLoader, EmptyState, Field, TextInput, TextArea, Spinner } from "../components/ui";
 import StarRating from "../components/StarRating";
+import FlavorRadar from "../components/FlavorRadar";
 import Modal from "../components/Modal";
 import ShareSession from "../components/ShareSession";
+import { FLAVOR_AXES } from "../lib/constants";
 import LangToggle from "../components/LangToggle";
 import { useProfile } from "../components/Profile";
 import { useToast } from "../components/Toast";
@@ -43,6 +45,15 @@ export default function Session() {
   const scored = tastings.filter((c) => c.overall != null);
   const avg = scored.length ? scored.reduce((a, c) => a + (c.overall ?? 0), 0) / scored.length : null;
   const recipe = session?.recipe;
+
+  // Group-average flavor profile across everyone who rated.
+  const flavorAvg: Record<string, number | null> = {};
+  let hasFlavor = false;
+  for (const axis of FLAVOR_AXES) {
+    const vals = tastings.map((c) => c[axis] as number | null).filter((n): n is number => n != null);
+    flavorAvg[axis] = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+    if (vals.length) hasFlavor = true;
+  }
 
   return (
     <div className="mx-auto flex min-h-[100dvh] w-full max-w-lg flex-col">
@@ -82,6 +93,14 @@ export default function Session() {
                 <StarRating value={Math.round(avg)} size={24} />
                 <span className="text-2xl font-bold text-gold tnum">{avg.toFixed(1)}</span>
                 <span className="text-sm text-cream-dim">· {t("session.tasters", { n: scored.length })}</span>
+              </div>
+            )}
+
+            {/* Group flavor radar */}
+            {hasFlavor && (
+              <div className="surface p-4">
+                <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-cream-dim">{t("session.flavorProfile")}</h2>
+                <FlavorRadar values={flavorAvg} size={250} />
               </div>
             )}
 
@@ -141,13 +160,17 @@ function TastingForm({
   const [author, setAuthor] = useState("");
   const [score, setScore] = useState(4);
   const [notes, setNotes] = useState("");
+  const [flavor, setFlavor] = useState<Record<string, number>>({});
   const [saving, setSaving] = useState(false);
+
+  const defaultFlavor = () => Object.fromEntries(FLAVOR_AXES.map((a) => [a, 3]));
 
   const [wasOpen, setWasOpen] = useState(false);
   if (open && !wasOpen) {
     setAuthor(profile.name);
     setScore(4);
     setNotes("");
+    setFlavor(defaultFlavor());
     setWasOpen(true);
   }
   if (!open && wasOpen) setWasOpen(false);
@@ -156,7 +179,17 @@ function TastingForm({
     if (!author.trim()) return notify(t("tasting.errName"), "error");
     setSaving(true);
     try {
-      const created = await createTasting({ brew_log_id: sessionId, author: author.trim(), overall: score, comment: notes || null });
+      const created = await createTasting({
+        brew_log_id: sessionId,
+        author: author.trim(),
+        overall: score,
+        comment: notes || null,
+        acidity: flavor.acidity,
+        body: flavor.body,
+        sweetness: flavor.sweetness,
+        bitterness: flavor.bitterness,
+        clarity: flavor.clarity,
+      });
       notify(t("tasting.added"));
       onSaved(created);
       onClose();
@@ -190,6 +223,20 @@ function TastingForm({
             <span className="text-lg font-bold text-gold tnum">{score}/5</span>
           </div>
         </div>
+
+        {/* Flavor axes — compact star rows that feed the radar */}
+        <div>
+          <span className="label">{t("tasting.flavor")}</span>
+          <div className="space-y-2.5 rounded-2xl bg-espresso-700 p-3">
+            {FLAVOR_AXES.map((axis) => (
+              <div key={axis} className="flex items-center justify-between gap-3">
+                <span className="text-sm text-cream">{t(`taste.${axis}` as const)}</span>
+                <StarRating value={flavor[axis] ?? 3} onChange={(v) => setFlavor((f) => ({ ...f, [axis]: v }))} size={20} />
+              </div>
+            ))}
+          </div>
+        </div>
+
         <Field label={t("tasting.fieldNotes")} optionalText={t("common.optional")}>
           <TextArea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={t("tasting.phNotes")} />
         </Field>
