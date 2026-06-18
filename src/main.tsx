@@ -4,18 +4,18 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import { I18nProvider } from "./i18n";
 import { ToastProvider } from "./components/Toast";
-import { AuthProvider } from "./components/Auth";
+import { ProfileProvider } from "./components/Profile";
 import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>
       <I18nProvider>
-        <AuthProvider>
+        <ProfileProvider>
           <ToastProvider>
             <App />
           </ToastProvider>
-        </AuthProvider>
+        </ProfileProvider>
       </I18nProvider>
     </BrowserRouter>
   </React.StrictMode>,

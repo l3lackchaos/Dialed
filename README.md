@@ -45,10 +45,11 @@ opens the link lands on a public session page (`/s/:id`) and can leave their own
 opinion — **no login required**. Each comment carries a name, an opinion, and
 that person's own 1–5 scores, and the group's average is plotted on a radar.
 
-### 6 · Google sign-in & quick profile
-Optional **Google login** (Supabase Auth). Signing in creates a quick profile
-(name + avatar) that **pre-fills your name** when you add an opinion, so logging
-is one tap faster. Login is purely additive — anonymous tasting still works.
+### 6 · Local quick profile (no login)
+A **device-local profile** — just a name and an icon, stored in `localStorage`.
+It **pre-fills your name** when you add a tasting comment, so logging is one tap
+faster. No accounts, no OAuth, no OIDC: nothing leaves the device until you post.
+Anonymous tasting still works for anyone who scans a shared session.
 
 ---
 
@@ -60,7 +61,7 @@ is one tap faster. Login is purely additive — anonymous tasting still works.
 | Styling   | Tailwind CSS (custom espresso/gold theme) |
 | Charts    | Recharts (tasting radar)                  |
 | Database  | Supabase (Postgres + RLS)                 |
-| Auth      | Supabase Auth — Google OAuth (optional)   |
+| Profile   | Local (localStorage) — no auth server     |
 | Sharing   | Web Share API · LINE · `qrcode.react`     |
 | Icons     | lucide-react                              |
 | Fonts     | Fraunces (display) · Inter (body)         |
@@ -76,29 +77,15 @@ beans ──1:N──▶ recipes ──1:N──▶ brew_logs ──1:N──▶
 ```
 
 Migrations live in [`supabase/migrations/`](supabase/migrations/):
-`0001_dialed_coffee_schema.sql` (beans/recipes/brew_logs) and
-`0002_brew_comments.sql` (multi-taster comments).
+`0001_dialed_coffee_schema.sql` (beans/recipes/brew_logs),
+`0002_brew_comments.sql` (multi-taster comments), and
+`0003_brewlog_gear_fields.sql` (per-brew clicks + grinder).
 
-RLS is enabled on every table with **permissive policies** — intentional, so
-the share-and-comment flow works for anonymous tasters. Google login is an
-optional convenience, not a gate. If you later want to scope data per user,
-tighten the policies to `auth.uid()`.
-
-### Google sign-in setup
-
-Google login needs the provider enabled in your Supabase project (this is
-dashboard config — it can't be scripted):
-
-1. **Google Cloud Console** → create an *OAuth 2.0 Client ID* (Web application).
-   Add this authorized redirect URI:
-   `https://<your-project-ref>.supabase.co/auth/v1/callback`
-2. **Supabase Dashboard** → *Authentication → Providers → Google* → paste the
-   Client ID and Secret, enable it.
-3. **Supabase Dashboard** → *Authentication → URL Configuration* → add your app
-   origin(s) (e.g. `http://localhost:5173` and your Vercel URL) to
-   *Site URL* / *Redirect URLs*.
-
-Full guide: <https://supabase.com/docs/guides/auth/social-login/auth-google>
+RLS is enabled on every table with **permissive policies** — intentional, so the
+share-and-comment flow works for anyone who opens a shared session. There is no
+auth server; identity is a local on-device profile used only to sign comments.
+If you later want real per-user accounts, add Supabase Auth and tighten the
+policies to `auth.uid()`.
 
 Until this is configured, the app runs fine anonymously — the Sign in button
 just won't complete.

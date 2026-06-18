@@ -11,10 +11,7 @@ if (!url || !anonKey) {
   );
 }
 
+// No auth server: the app uses a local on-device profile (see components/Profile).
 export const supabase = createClient<Database>(url, anonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true, // completes the Google OAuth redirect
-  },
+  auth: { persistSession: false },
 });

@@ -7,9 +7,14 @@ export const en = {
   "nav.recipes": "Recipes",
   "nav.brews": "Brews",
 
-  "account.signIn": "Sign in",
-  "account.signOut": "Sign out",
-  "auth.signInGoogle": "Sign in with Google",
+  "profile.button": "Profile",
+  "profile.setup": "Set up profile",
+  "profile.title": "Your profile",
+  "profile.subtitle": "Signs your tasting comments — saved on this device only.",
+  "profile.emoji": "Pick an icon",
+  "profile.clear": "Clear profile",
+  "profile.errName": "Enter a name first",
+  "profile.saved": "Profile saved",
 
   "common.save": "Save",
   "common.saving": "Saving…",

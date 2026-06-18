@@ -9,9 +9,14 @@ export const th: Record<keyof typeof en, string> = {
   "nav.recipes": "สูตร",
   "nav.brews": "การชง",
 
-  "account.signIn": "เข้าสู่ระบบ",
-  "account.signOut": "ออกจากระบบ",
-  "auth.signInGoogle": "เข้าสู่ระบบด้วย Google",
+  "profile.button": "โปรไฟล์",
+  "profile.setup": "ตั้งโปรไฟล์",
+  "profile.title": "โปรไฟล์ของคุณ",
+  "profile.subtitle": "ใช้เซ็นชื่อในความเห็นการชิม — เก็บในเครื่องนี้เท่านั้น",
+  "profile.emoji": "เลือกไอคอน",
+  "profile.clear": "ล้างโปรไฟล์",
+  "profile.errName": "ใส่ชื่อก่อนนะ",
+  "profile.saved": "บันทึกโปรไฟล์แล้ว",
 
   "common.save": "บันทึก",
   "common.saving": "กำลังบันทึก…",

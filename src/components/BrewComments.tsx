@@ -8,7 +8,7 @@ import { TASTE_AXES, type TasteAxis } from "../lib/constants";
 import { average } from "../lib/format";
 import { fetchBrewComments, createBrewComment, deleteBrewComment } from "../lib/queries";
 import { useToast } from "./Toast";
-import { useAuth } from "./Auth";
+import { useProfile } from "./Profile";
 import { useT } from "../i18n";
 import type { BrewComment } from "../lib/types";
 
@@ -123,7 +123,7 @@ function CommentForm({
 }) {
   const t = useT();
   const { notify } = useToast();
-  const { profile } = useAuth();
+  const { profile } = useProfile();
   const [author, setAuthor] = useState("");
   const [comment, setComment] = useState("");
   const [scores, setScores] = useState<Scores>({ ...defaultScores });
