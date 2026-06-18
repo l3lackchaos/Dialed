@@ -10,9 +10,9 @@ export default function ScoreSlider({
 }) {
   return (
     <div>
-      <div className="mb-1.5 flex items-center justify-between">
-        <span className="text-sm font-medium text-cream">{label}</span>
-        <span className="flex h-6 w-6 items-center justify-center rounded-md bg-gold/15 text-xs font-bold text-gold">
+      <div className="mb-2 flex items-center justify-between">
+        <span className="text-[0.95rem] font-medium text-cream">{label}</span>
+        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gold/15 text-sm font-bold text-gold tnum">
           {value}
         </span>
       </div>
@@ -25,12 +25,8 @@ export default function ScoreSlider({
         onChange={(e) => onChange(Number(e.target.value))}
         className="slider"
         aria-label={label}
+        aria-valuetext={`${value} / 5`}
       />
-      <div className="mt-1 flex justify-between px-0.5 text-[0.6rem] text-cream-mute">
-        {[1, 2, 3, 4, 5].map((n) => (
-          <span key={n}>{n}</span>
-        ))}
-      </div>
     </div>
   );
 }

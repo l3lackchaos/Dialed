@@ -15,131 +15,150 @@
 
   body {
     @apply bg-espresso text-cream font-sans antialiased;
-    /* Layered warmth: a faint gold glow up top over the espresso base,
-       plus an ultra-subtle paper grain so it reads like a notebook, not a template. */
+    /* A single soft pool of warm light up top — like a lamp over the brew bar.
+       No paper grain, no all-over glass; the surfaces stay solid and legible. */
     background-color: #140c05;
-    background-image:
-      radial-gradient(
-        120% 80% at 50% -10%,
-        rgba(200, 150, 58, 0.1) 0%,
-        rgba(20, 12, 5, 0) 55%
-      ),
-      radial-gradient(
-        90% 60% at 100% 0%,
-        rgba(160, 118, 42, 0.07) 0%,
-        rgba(20, 12, 5, 0) 50%
-      );
+    background-image: radial-gradient(
+      110% 70% at 50% -15%,
+      rgba(200, 150, 58, 0.08) 0%,
+      rgba(20, 12, 5, 0) 55%
+    );
     background-attachment: fixed;
-  }
-
-  /* Thin gold scrollbar to match the theme */
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(200, 150, 58, 0.4) transparent;
-  }
-  *::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-  *::-webkit-scrollbar-thumb {
-    background: rgba(200, 150, 58, 0.35);
-    border-radius: 999px;
+    -webkit-tap-highlight-color: transparent;
   }
 
   h1,
   h2,
-  h3,
-  h4 {
-    @apply font-display;
+  h3 {
+    text-wrap: balance;
   }
 
-  /* Native form controls inherit the warm palette */
+  /* Numbers (doses, ratios, scores, times) align in tabular columns */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+
   select option {
-    background-color: #1a1107;
-    color: #f0e4cc;
+    background-color: #1c130a;
+    color: #f4e9d4;
+  }
+
+  /* Always-visible, keyboard-friendly focus */
+  :focus-visible {
+    outline: 2px solid rgba(200, 150, 58, 0.7);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(200, 150, 58, 0.35) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: rgba(200, 150, 58, 0.3);
+    border-radius: 999px;
   }
 }
 
 @layer components {
-  /* Frosted notebook card */
-  .card {
-    @apply rounded-2xl border border-gold/15 bg-espresso-800/70 shadow-card backdrop-blur-sm;
+  /* Solid raised surface — not glass. Used sparingly, never nested. */
+  .surface {
+    @apply rounded-2xl border border-cream/10 bg-espresso-800 shadow-raise;
   }
 
-  .card-hover {
-    @apply transition-all duration-200 hover:border-gold/40 hover:shadow-gold;
+  /* Form controls — large targets, AA contrast, consistent across the app */
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-cream-dim;
   }
 
-  /* Section eyebrow label */
-  .eyebrow {
-    @apply text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-gold/80;
+  .field {
+    @apply w-full rounded-xl border border-cream/10 bg-espresso-700 px-3.5 text-[1rem] text-cream
+      placeholder:text-cream-mute outline-none transition-colors duration-150
+      focus:border-gold/70;
+    min-height: 48px;
   }
 
-  /* Inputs */
-  .field-label {
-    @apply mb-1.5 block text-xs font-medium uppercase tracking-wider text-cream-dim;
+  textarea.field {
+    @apply py-3 leading-relaxed;
+    min-height: 96px;
+    resize: vertical;
   }
 
-  .input {
-    @apply w-full rounded-xl border border-gold/15 bg-espresso-900/60 px-3.5 py-2.5 text-[0.95rem] text-cream
-      placeholder:text-cream-mute/60 outline-none transition
-      focus:border-gold/60 focus:ring-2 focus:ring-gold/20;
-  }
-
-  .input-sm {
-    @apply rounded-lg border border-gold/15 bg-espresso-900/60 px-2.5 py-1.5 text-sm text-cream
-      placeholder:text-cream-mute/60 outline-none transition
-      focus:border-gold/60 focus:ring-2 focus:ring-gold/20;
+  select.field {
+    @apply appearance-none pr-10;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23A99B7F' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
   }
 
   /* Buttons */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold
-      transition-all duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 text-[0.95rem] font-semibold
+      transition-all duration-150 ease-out-quart
+      active:scale-[0.98] disabled:pointer-events-none disabled:opacity-45;
+    min-height: 48px;
   }
-
-  .btn-gold {
-    @apply btn bg-gold-sheen text-espresso-900 shadow-gold hover:brightness-110;
+  .btn-primary {
+    @apply btn bg-gold text-espresso-900 shadow-gold hover:bg-gold-light;
   }
-
   .btn-ghost {
-    @apply btn border border-gold/25 bg-transparent text-cream hover:bg-gold/10;
+    @apply btn border border-cream/20 bg-transparent text-cream hover:border-gold/50 hover:bg-gold/5;
+  }
+  .btn-quiet {
+    @apply btn bg-espresso-700 text-cream-dim hover:bg-espresso-600 hover:text-cream;
+  }
+  .btn-danger {
+    @apply btn bg-danger text-white hover:brightness-110;
   }
 
-  .btn-subtle {
-    @apply btn bg-espresso-700/60 text-cream-dim hover:bg-espresso-600 hover:text-cream;
+  /* Small pill for facts (process, roast, ratio) */
+  .tag {
+    @apply inline-flex items-center gap-1 rounded-lg border border-cream/10 bg-espresso-700 px-2 py-1
+      text-2xs font-medium text-cream-dim;
   }
 
-  .chip {
-    @apply inline-flex items-center gap-1 rounded-full border border-gold/25 bg-gold/10 px-2.5 py-0.5
-      text-[0.7rem] font-medium tracking-wide text-gold-light;
+  /* Gold tasting-score chip */
+  .score {
+    @apply inline-flex items-center gap-1 rounded-lg bg-gold/20 px-2 py-1 text-sm font-bold text-gold tnum;
   }
 
-  /* Range slider — gold themed */
+  /* Range slider */
   .slider {
-    @apply h-1.5 w-full cursor-pointer appearance-none rounded-full bg-espresso-600;
-    accent-color: #c8963a;
+    @apply h-2 w-full cursor-pointer appearance-none rounded-full;
+    background: theme("colors.espresso.600");
   }
   .slider::-webkit-slider-thumb {
-    @apply h-5 w-5 appearance-none rounded-full;
-    background: linear-gradient(135deg, #e0b968, #a2762a);
-    border: 2px solid #140c05;
-    box-shadow: 0 0 0 1px rgba(200, 150, 58, 0.5);
-    margin-top: -1px;
+    @apply h-6 w-6 appearance-none rounded-full bg-gold;
+    border: 3px solid #140c05;
+    box-shadow: 0 0 0 1px rgba(200, 150, 58, 0.6);
   }
   .slider::-moz-range-thumb {
-    @apply h-5 w-5 rounded-full border-0;
-    background: linear-gradient(135deg, #e0b968, #a2762a);
-    box-shadow: 0 0 0 1px rgba(200, 150, 58, 0.5);
+    @apply h-6 w-6 rounded-full border-0 bg-gold;
+    box-shadow: 0 0 0 3px #140c05;
   }
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-  /* Respect notched phones */
   .safe-bottom {
-    padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem);
+    padding-bottom: max(env(safe-area-inset-bottom), 0.5rem);
+  }
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+}
+
+/* Motion is state, never decoration — and never required to see content */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
 }

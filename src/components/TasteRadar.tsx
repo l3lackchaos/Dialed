@@ -7,6 +7,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { TASTE_AXES } from "../lib/constants";
+import { useT } from "../i18n";
 
 export type RadarSeries = {
   name: string;
@@ -25,8 +26,11 @@ export default function TasteRadar({
   series: RadarSeries[];
   height?: number;
 }) {
+  const t = useT();
   const data = TASTE_AXES.map((axis) => {
-    const row: Record<string, number | string | null> = { axis: axis.label };
+    const row: Record<string, number | string | null> = {
+      axis: t(`taste.${axis.key}` as const),
+    };
     series.forEach((s, i) => {
       row[`s${i}`] = s.values[axis.key] ?? 0;
     });
@@ -36,15 +40,15 @@ export default function TasteRadar({
   return (
     <ResponsiveContainer width="100%" height={height}>
       <RadarChart data={data} outerRadius="72%">
-        <PolarGrid stroke="rgba(240,228,204,0.12)" />
+        <PolarGrid stroke="rgba(244,233,212,0.12)" />
         <PolarAngleAxis
           dataKey="axis"
-          tick={{ fill: "#C8BBA0", fontSize: 11, fontWeight: 500 }}
+          tick={{ fill: "#D6C8AC", fontSize: 11, fontWeight: 500 }}
         />
         <PolarRadiusAxis
           domain={[0, 5]}
           tickCount={6}
-          tick={{ fill: "#8C8068", fontSize: 9 }}
+          tick={{ fill: "#A99B7F", fontSize: 9 }}
           axisLine={false}
         />
         {series.map((s, i) => (

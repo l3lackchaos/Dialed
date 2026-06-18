@@ -25,6 +25,10 @@ export async function fetchBeans(): Promise<Bean[]> {
   );
 }
 
+export async function fetchBean(id: string): Promise<Bean> {
+  return unwrap(await supabase.from("beans").select("*").eq("id", id).single());
+}
+
 export async function createBean(payload: BeanInsert): Promise<Bean> {
   return unwrap(await supabase.from("beans").insert(payload).select().single());
 }
@@ -59,6 +63,10 @@ export async function fetchFavoriteRecipes(): Promise<RecipeWithBean[]> {
       .eq("is_favorite", true)
       .order("created_at", { ascending: false }),
   ) as RecipeWithBean[];
+}
+
+export async function fetchRecipe(id: string): Promise<Recipe> {
+  return unwrap(await supabase.from("recipes").select("*").eq("id", id).single());
 }
 
 export async function createRecipe(payload: RecipeInsert): Promise<Recipe> {

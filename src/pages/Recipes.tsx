@@ -1,68 +1,45 @@
 import { useState } from "react";
-import {
-  BookOpen,
-  Plus,
-  Pencil,
-  Trash2,
-  Star,
-  Thermometer,
-  Scale,
-  Timer,
-  PlayCircle,
-} from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { BookOpen, Plus, Pencil, Trash2, Star, PlayCircle } from "lucide-react";
+import { useT } from "../i18n";
 import { useQuery } from "../hooks/useQuery";
-import {
-  fetchRecipes,
-  fetchBeans,
-  deleteRecipe,
-  toggleRecipeFavorite,
-} from "../lib/queries";
+import { fetchRecipes, fetchBeans, deleteRecipe, toggleRecipeFavorite } from "../lib/queries";
 import { parsePourSchedule } from "../lib/format";
-import { SectionHeading, LoadingState, EmptyState, StatPill } from "../components/ui";
-import RecipeForm from "../components/RecipeForm";
-import BrewLogForm from "../components/BrewLogForm";
+import { TabHeader, EmptyState, Skeleton } from "../components/ui";
 import ConfirmDialog from "../components/ConfirmDialog";
 import { useToast } from "../components/Toast";
-import type { Recipe, RecipeWithBean } from "../lib/types";
+import type { RecipeWithBean } from "../lib/types";
 
 export default function Recipes() {
+  const t = useT();
   const { notify } = useToast();
+  const navigate = useNavigate();
   const recipesQ = useQuery(fetchRecipes);
   const beansQ = useQuery(fetchBeans);
   const recipes = recipesQ.data ?? [];
   const beans = beansQ.data ?? [];
 
-  const [formOpen, setFormOpen] = useState(false);
-  const [editing, setEditing] = useState<Recipe | null>(null);
   const [deleting, setDeleting] = useState<RecipeWithBean | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const [logFor, setLogFor] = useState<RecipeWithBean | null>(null);
-
-  function openNew() {
-    setEditing(null);
-    setFormOpen(true);
-  }
-
-  async function toggleFav(recipe: RecipeWithBean) {
+  async function toggleFav(r: RecipeWithBean) {
     try {
-      await toggleRecipeFavorite(recipe.id, !recipe.is_favorite);
+      await toggleRecipeFavorite(r.id, !r.is_favorite);
       recipesQ.refetch();
     } catch (err) {
-      notify(err instanceof Error ? err.message : "Could not update", "error");
+      notify(err instanceof Error ? err.message : "", "error");
     }
   }
-
   async function confirmDelete() {
     if (!deleting) return;
     setBusy(true);
     try {
       await deleteRecipe(deleting.id);
-      notify("Recipe deleted");
+      notify(t("recipes.deleted"));
       setDeleting(null);
       recipesQ.refetch();
     } catch (err) {
-      notify(err instanceof Error ? err.message : "Could not delete", "error");
+      notify(err instanceof Error ? err.message : "", "error");
     } finally {
       setBusy(false);
     }
@@ -72,78 +49,53 @@ export default function Recipes() {
 
   return (
     <div className="animate-fade-up">
-      <SectionHeading
-        eyebrow="Feature 02"
-        title="Recipes"
+      <TabHeader
+        title={t("recipes.title")}
         action={
-          <button
-            className="btn-gold"
-            onClick={openNew}
-            disabled={beans.length === 0}
-            title={beans.length === 0 ? "Add a bean first" : undefined}
-          >
-            <Plus className="h-4 w-4" /> Recipe
-          </button>
+          beans.length > 0 ? (
+            <Link to="/recipes/new" className="btn-primary h-10 px-3.5">
+              <Plus className="h-4 w-4" /> {t("recipes.new")}
+            </Link>
+          ) : undefined
         }
       />
 
       {loading ? (
-        <LoadingState label="Loading recipes…" />
+        <div className="space-y-3">{[0, 1].map((i) => <Skeleton key={i} className="h-36" />)}</div>
       ) : beans.length === 0 ? (
         <EmptyState
           icon={<BookOpen className="h-7 w-7" />}
-          title="Add a bean first"
-          description="Recipes link to a bean. Head to The Shelf and add what you're brewing, then come back to build a recipe."
+          title={t("recipes.needBeanTitle")}
+          description={t("recipes.needBeanDesc")}
+          action={<Link to="/beans/new" className="btn-primary px-4"><Plus className="h-4 w-4" /> {t("beans.new")}</Link>}
         />
       ) : recipes.length === 0 ? (
         <EmptyState
           icon={<BookOpen className="h-7 w-7" />}
-          title="No recipes yet"
-          description="Build your first pour-over recipe — dripper, grind, ratio and a full pour schedule."
-          action={
-            <button className="btn-gold" onClick={openNew}>
-              <Plus className="h-4 w-4" /> New recipe
-            </button>
-          }
+          title={t("recipes.emptyTitle")}
+          description={t("recipes.emptyDesc")}
+          action={<Link to="/recipes/new" className="btn-primary px-4"><Plus className="h-4 w-4" /> {t("recipes.emptyCta")}</Link>}
         />
       ) : (
-        <div className="space-y-3">
-          {recipes.map((recipe) => (
-            <RecipeCard
-              key={recipe.id}
-              recipe={recipe}
-              onEdit={() => {
-                setEditing(recipe);
-                setFormOpen(true);
-              }}
-              onDelete={() => setDeleting(recipe)}
-              onToggleFav={() => toggleFav(recipe)}
-              onLog={() => setLogFor(recipe)}
-            />
+        <ul className="space-y-3">
+          {recipes.map((r) => (
+            <li key={r.id}>
+              <RecipeRow
+                recipe={r}
+                onEdit={() => navigate(`/recipes/${r.id}/edit`)}
+                onDelete={() => setDeleting(r)}
+                onToggleFav={() => toggleFav(r)}
+                onLog={() => navigate(`/logs/new?recipe=${r.id}`)}
+              />
+            </li>
           ))}
-        </div>
+        </ul>
       )}
-
-      <RecipeForm
-        open={formOpen}
-        onClose={() => setFormOpen(false)}
-        onSaved={recipesQ.refetch}
-        beans={beans}
-        recipe={editing}
-      />
-
-      <BrewLogForm
-        open={!!logFor}
-        onClose={() => setLogFor(null)}
-        onSaved={() => {}}
-        recipes={recipes}
-        defaultRecipeId={logFor?.id}
-      />
 
       <ConfirmDialog
         open={!!deleting}
-        title="Delete recipe?"
-        message={`"${deleting?.name}" and its brew logs will be permanently deleted.`}
+        title={t("recipes.deleteTitle")}
+        message={t("recipes.deleteMsg", { name: deleting?.name ?? "" })}
         busy={busy}
         onCancel={() => setDeleting(null)}
         onConfirm={confirmDelete}
@@ -152,7 +104,16 @@ export default function Recipes() {
   );
 }
 
-function RecipeCard({
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg bg-espresso-700 px-2.5 py-1.5">
+      <p className="text-2xs text-cream-mute">{label}</p>
+      <p className="mt-0.5 text-sm font-semibold text-cream tnum">{value}</p>
+    </div>
+  );
+}
+
+function RecipeRow({
   recipe,
   onEdit,
   onDelete,
@@ -165,106 +126,65 @@ function RecipeCard({
   onToggleFav: () => void;
   onLog: () => void;
 }) {
+  const t = useT();
   const steps = parsePourSchedule(recipe.pour_schedule);
 
   return (
-    <article className="card card-hover p-4">
+    <div className="surface p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <h3 className="truncate text-lg font-semibold text-cream">{recipe.name}</h3>
-            {recipe.is_favorite && (
-              <Star className="h-4 w-4 shrink-0 fill-gold text-gold" />
-            )}
-          </div>
-          <p className="mt-0.5 text-sm text-gold/80">{recipe.bean?.name ?? "—"}</p>
+          <h3 className="truncate text-[1.05rem] font-semibold text-cream">{recipe.name}</h3>
+          <p className="mt-0.5 text-sm text-gold/85">{recipe.bean?.name ?? t("common.none")}</p>
         </div>
-        <div className="flex shrink-0 gap-1">
-          <button
-            onClick={onToggleFav}
-            className={`rounded-lg p-1.5 transition hover:bg-gold/10 ${
-              recipe.is_favorite ? "text-gold" : "text-cream-mute hover:text-gold"
-            }`}
-            aria-label="Toggle favorite"
-          >
-            <Star className={`h-4 w-4 ${recipe.is_favorite ? "fill-gold" : ""}`} />
+        <div className="flex shrink-0 items-center">
+          <button onClick={onToggleFav} className="flex h-9 w-9 items-center justify-center text-cream-mute transition-colors hover:text-gold" aria-label={t("recipes.favorite")}>
+            <Star className={`h-5 w-5 ${recipe.is_favorite ? "fill-gold text-gold" : ""}`} />
           </button>
-          <button
-            onClick={onEdit}
-            className="rounded-lg p-1.5 text-cream-mute transition hover:bg-gold/10 hover:text-gold"
-            aria-label="Edit recipe"
-          >
+          <button onClick={onEdit} className="flex h-9 w-9 items-center justify-center text-cream-mute transition-colors hover:text-gold" aria-label={t("common.edit")}>
             <Pencil className="h-4 w-4" />
           </button>
-          <button
-            onClick={onDelete}
-            className="rounded-lg p-1.5 text-cream-mute transition hover:bg-red-500/15 hover:text-red-400"
-            aria-label="Delete recipe"
-          >
+          <button onClick={onDelete} className="flex h-9 w-9 items-center justify-center text-cream-mute transition-colors hover:text-danger" aria-label={t("common.delete")}>
             <Trash2 className="h-4 w-4" />
           </button>
         </div>
       </div>
 
-      <div className="mt-3 flex flex-wrap gap-1.5">
-        {recipe.dripper && <span className="chip">{recipe.dripper}</span>}
-        {recipe.grinder && <span className="chip">{recipe.grinder}</span>}
-        {recipe.click_setting && <span className="chip">{recipe.click_setting}</span>}
-      </div>
+      {(recipe.dripper || recipe.grinder || recipe.click_setting) && (
+        <div className="mt-2.5 flex flex-wrap gap-1.5">
+          {recipe.dripper && <span className="tag">{recipe.dripper}</span>}
+          {recipe.grinder && <span className="tag">{recipe.grinder}</span>}
+          {recipe.click_setting && <span className="tag">{recipe.click_setting}</span>}
+        </div>
+      )}
 
       <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <StatPill
-          label="Dose / Water"
-          value={
-            <span className="flex items-center gap-1">
-              <Scale className="h-3.5 w-3.5 text-gold/70" />
-              {recipe.dose_g ?? "—"} / {recipe.water_g ?? "—"}g
-            </span>
-          }
-        />
-        <StatPill label="Ratio" value={recipe.ratio ?? "—"} />
-        <StatPill
-          label="Temp"
-          value={
-            <span className="flex items-center gap-1">
-              <Thermometer className="h-3.5 w-3.5 text-gold/70" />
-              {recipe.water_temp ? `${recipe.water_temp}°C` : "—"}
-            </span>
-          }
-        />
-        <StatPill
-          label="Target"
-          value={
-            <span className="flex items-center gap-1">
-              <Timer className="h-3.5 w-3.5 text-gold/70" />
-              {recipe.target_time ?? "—"}
-            </span>
-          }
-        />
+        <Stat label={t("recipes.statDoseWater")} value={`${recipe.dose_g ?? "–"}/${recipe.water_g ?? "–"}g`} />
+        <Stat label={t("recipes.statRatio")} value={recipe.ratio ?? "—"} />
+        <Stat label={t("recipes.statTemp")} value={recipe.water_temp ? `${recipe.water_temp}°C` : "—"} />
+        <Stat label={t("recipes.statTarget")} value={recipe.target_time ?? "—"} />
       </div>
 
       {steps.length > 0 && (
         <details className="group mt-3">
-          <summary className="cursor-pointer list-none text-xs font-medium text-gold/80 transition hover:text-gold">
-            <span className="group-open:hidden">▸ Pour schedule ({steps.length})</span>
-            <span className="hidden group-open:inline">▾ Pour schedule</span>
+          <summary className="cursor-pointer list-none text-sm font-medium text-gold/85 transition-colors hover:text-gold">
+            {t("recipes.scheduleN", { n: steps.length })}
           </summary>
-          <div className="mt-2 overflow-hidden rounded-lg border border-gold/10">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-espresso-900/60 text-[0.65rem] uppercase tracking-wider text-gold/70">
+          <div className="mt-2 overflow-hidden rounded-lg border border-cream/10">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-espresso-700 text-2xs uppercase tracking-wide text-cream-dim">
                 <tr>
-                  <th className="px-2.5 py-1.5 font-semibold">Pour</th>
-                  <th className="px-2.5 py-1.5 font-semibold">Cum. g</th>
-                  <th className="px-2.5 py-1.5 font-semibold">Time</th>
-                  <th className="px-2.5 py-1.5 font-semibold">Note</th>
+                  <th className="px-2.5 py-1.5 font-semibold">{t("pour.pour")}</th>
+                  <th className="px-2.5 py-1.5 font-semibold">{t("pour.cumulative")}</th>
+                  <th className="px-2.5 py-1.5 font-semibold">{t("pour.time")}</th>
+                  <th className="px-2.5 py-1.5 font-semibold">{t("pour.note")}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gold/5">
+              <tbody className="divide-y divide-cream/8">
                 {steps.map((s, i) => (
                   <tr key={i} className="text-cream-dim">
                     <td className="px-2.5 py-1.5 text-cream">{s.pour || "—"}</td>
-                    <td className="px-2.5 py-1.5">{s.cumulative_g || "—"}</td>
-                    <td className="px-2.5 py-1.5">{s.time || "—"}</td>
+                    <td className="px-2.5 py-1.5 tnum">{s.cumulative_g || "—"}</td>
+                    <td className="px-2.5 py-1.5 tnum">{s.time || "—"}</td>
                     <td className="px-2.5 py-1.5">{s.note || "—"}</td>
                   </tr>
                 ))}
@@ -274,13 +194,11 @@ function RecipeCard({
         </details>
       )}
 
-      {recipe.notes && (
-        <p className="mt-3 text-sm italic text-cream-dim">{recipe.notes}</p>
-      )}
+      {recipe.notes && <p className="mt-3 text-sm italic leading-relaxed text-cream-dim">{recipe.notes}</p>}
 
       <button onClick={onLog} className="btn-ghost mt-3 w-full">
-        <PlayCircle className="h-4 w-4" /> Log this brew
+        <PlayCircle className="h-4 w-4" /> {t("recipes.logThis")}
       </button>
-    </article>
+    </div>
   );
 }

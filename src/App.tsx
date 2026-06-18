@@ -1,32 +1,67 @@
-import { NavLink, Route, Routes } from "react-router-dom";
-import { LayoutDashboard, Coffee, BookOpen, ClipboardList } from "lucide-react";
+import { NavLink, Outlet, Route, Routes } from "react-router-dom";
+import { Home, Coffee, BookOpen, ClipboardList } from "lucide-react";
+import { useT } from "./i18n";
+import AccountButton from "./components/AccountButton";
+import LangToggle from "./components/LangToggle";
+
 import Dashboard from "./pages/Dashboard";
 import Beans from "./pages/Beans";
 import Recipes from "./pages/Recipes";
-import BrewLogs from "./pages/BrewLogs";
+import Brews from "./pages/Brews";
 import Session from "./pages/Session";
-import AccountButton from "./components/AccountButton";
-
-const NAV = [
-  { to: "/", label: "Home", icon: LayoutDashboard, end: true },
-  { to: "/beans", label: "Beans", icon: Coffee, end: false },
-  { to: "/recipes", label: "Recipes", icon: BookOpen, end: false },
-  { to: "/logs", label: "Brews", icon: ClipboardList, end: false },
-];
+import BeanEdit from "./pages/BeanEdit";
+import RecipeEdit from "./pages/RecipeEdit";
+import LogEdit from "./pages/LogEdit";
 
 export default function App() {
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-3xl flex-col">
-      <BrandBar />
+    <Routes>
+      {/* Main tabbed app shell */}
+      <Route element={<TabLayout />}>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/beans" element={<Beans />} />
+        <Route path="/recipes" element={<Recipes />} />
+        <Route path="/logs" element={<Brews />} />
+      </Route>
 
-      <main className="flex-1 px-4 pb-28 pt-4 sm:px-6">
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/beans" element={<Beans />} />
-          <Route path="/recipes" element={<Recipes />} />
-          <Route path="/logs" element={<BrewLogs />} />
-          <Route path="/s/:logId" element={<Session />} />
-        </Routes>
+      {/* Full-screen form routes (no tab chrome) */}
+      <Route path="/beans/new" element={<BeanEdit />} />
+      <Route path="/beans/:id/edit" element={<BeanEdit />} />
+      <Route path="/recipes/new" element={<RecipeEdit />} />
+      <Route path="/recipes/:id/edit" element={<RecipeEdit />} />
+      <Route path="/logs/new" element={<LogEdit />} />
+      <Route path="/logs/:id/edit" element={<LogEdit />} />
+
+      {/* Public shared session */}
+      <Route path="/s/:logId" element={<Session />} />
+    </Routes>
+  );
+}
+
+function TabLayout() {
+  const t = useT();
+  return (
+    <div className="mx-auto flex min-h-[100dvh] w-full max-w-lg flex-col">
+      <header className="safe-top sticky top-0 z-sticky border-b border-cream/10 bg-espresso/90 backdrop-blur-md">
+        <div className="flex items-center gap-3 px-4 py-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gold text-espresso-900 shadow-gold">
+            <Coffee className="h-5 w-5" strokeWidth={2.4} />
+          </div>
+          <div className="leading-tight">
+            <p className="font-display text-lg font-semibold tracking-tight text-cream">
+              Dialed
+            </p>
+            <p className="text-2xs text-cream-mute">{t("app.tagline")}</p>
+          </div>
+          <div className="ml-auto flex items-center gap-2">
+            <LangToggle />
+            <AccountButton />
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-1 px-4 pb-28 pt-5">
+        <Outlet />
       </main>
 
       <BottomNav />
@@ -34,54 +69,34 @@ export default function App() {
   );
 }
 
-function BrandBar() {
-  return (
-    <header className="sticky top-0 z-40 border-b border-gold/10 bg-espresso/80 backdrop-blur-md">
-      <div className="flex items-center gap-3 px-4 py-3.5 sm:px-6">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gold-sheen text-espresso-900 shadow-gold">
-          <Coffee className="h-5 w-5" strokeWidth={2.4} />
-        </div>
-        <div className="leading-none">
-          <h1 className="font-display text-xl font-semibold tracking-tight text-cream">
-            Dialed
-          </h1>
-          <p className="mt-0.5 text-[0.65rem] uppercase tracking-[0.25em] text-gold/70">
-            Pour-Over Notebook
-          </p>
-        </div>
-        <div className="ml-auto">
-          <AccountButton />
-        </div>
-      </div>
-    </header>
-  );
-}
-
 function BottomNav() {
+  const t = useT();
+  const items = [
+    { to: "/", label: t("nav.home"), icon: Home, end: true },
+    { to: "/beans", label: t("nav.beans"), icon: Coffee, end: false },
+    { to: "/recipes", label: t("nav.recipes"), icon: BookOpen, end: false },
+    { to: "/logs", label: t("nav.brews"), icon: ClipboardList, end: false },
+  ];
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-gold/15 bg-espresso-900/90 backdrop-blur-lg safe-bottom">
-      <div className="mx-auto grid max-w-3xl grid-cols-4">
-        {NAV.map(({ to, label, icon: Icon, end }) => (
+    <nav className="safe-bottom fixed inset-x-0 bottom-0 z-nav border-t border-cream/10 bg-espresso-900/95 backdrop-blur-lg">
+      <div className="mx-auto grid max-w-lg grid-cols-4">
+        {items.map(({ to, label, icon: Icon, end }) => (
           <NavLink
             key={to}
             to={to}
             end={end}
-            className={({ isActive }) =>
-              `flex flex-col items-center gap-1 py-2.5 text-[0.7rem] font-medium transition-colors ${
-                isActive ? "text-gold" : "text-cream-mute hover:text-cream-dim"
-              }`
-            }
+            className="flex flex-col items-center gap-1 py-2 text-2xs font-medium"
           >
             {({ isActive }) => (
               <>
                 <span
-                  className={`flex h-9 w-9 items-center justify-center rounded-xl transition-all ${
-                    isActive ? "bg-gold/15 text-gold" : "text-current"
+                  className={`flex h-9 w-12 items-center justify-center rounded-lg transition-colors duration-150 ${
+                    isActive ? "bg-gold/15 text-gold" : "text-cream-mute"
                   }`}
                 >
                   <Icon className="h-5 w-5" strokeWidth={isActive ? 2.4 : 2} />
                 </span>
-                {label}
+                <span className={isActive ? "text-gold" : "text-cream-mute"}>{label}</span>
               </>
             )}
           </NavLink>

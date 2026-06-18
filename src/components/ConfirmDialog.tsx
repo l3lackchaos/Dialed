@@ -1,10 +1,11 @@
 import Modal from "./Modal";
+import { useT } from "../i18n";
 
 export default function ConfirmDialog({
   open,
   title,
   message,
-  confirmLabel = "Delete",
+  confirmLabel,
   busy = false,
   onCancel,
   onConfirm,
@@ -17,6 +18,7 @@ export default function ConfirmDialog({
   onCancel: () => void;
   onConfirm: () => void;
 }) {
+  const t = useT();
   return (
     <Modal
       open={open}
@@ -24,20 +26,16 @@ export default function ConfirmDialog({
       title={title}
       footer={
         <>
-          <button className="btn-subtle" onClick={onCancel} disabled={busy}>
-            Cancel
+          <button className="btn-quiet flex-1" onClick={onCancel} disabled={busy}>
+            {t("common.cancel")}
           </button>
-          <button
-            className="btn bg-red-500/90 text-white hover:bg-red-500"
-            onClick={onConfirm}
-            disabled={busy}
-          >
-            {busy ? "Working…" : confirmLabel}
+          <button className="btn-danger flex-1" onClick={onConfirm} disabled={busy}>
+            {busy ? t("common.working") : confirmLabel ?? t("common.delete")}
           </button>
         </>
       }
     >
-      <p className="text-sm text-cream-dim">{message}</p>
+      <p className="text-sm leading-relaxed text-cream-dim">{message}</p>
     </Modal>
   );
 }

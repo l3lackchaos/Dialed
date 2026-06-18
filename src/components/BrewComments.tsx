@@ -4,50 +4,34 @@ import Modal from "./Modal";
 import { Field, TextInput, TextArea, Spinner } from "./ui";
 import ScoreSlider from "./ScoreSlider";
 import TasteRadar from "./TasteRadar";
-import { TASTE_AXES } from "../lib/constants";
+import { TASTE_AXES, type TasteAxis } from "../lib/constants";
 import { average } from "../lib/format";
-import {
-  fetchBrewComments,
-  createBrewComment,
-  deleteBrewComment,
-} from "../lib/queries";
+import { fetchBrewComments, createBrewComment, deleteBrewComment } from "../lib/queries";
 import { useToast } from "./Toast";
 import { useAuth } from "./Auth";
+import { useT } from "../i18n";
 import type { BrewComment } from "../lib/types";
 
-type Scores = Record<(typeof TASTE_AXES)[number]["key"], number>;
+type Scores = Record<TasteAxis, number>;
 const defaultScores: Scores = {
-  acidity: 3,
-  body: 3,
-  sweetness: 3,
-  bitterness: 3,
-  clarity: 3,
-  overall: 3,
+  acidity: 3, body: 3, sweetness: 3, bitterness: 3, clarity: 3, overall: 3,
 };
 
-/**
- * Multi-taster comment thread for one brew. Each person leaves a name, an
- * opinion, and their own 1-5 scores; the group's average is plotted on a radar.
- * Mounted lazily (inside an expanded section) so it only queries when opened.
- */
+/** Multi-taster comment thread for one brew, with a group-average radar. */
 export default function BrewComments({ brewLogId }: { brewLogId: string }) {
+  const t = useT();
   const { notify } = useToast();
   const [comments, setComments] = useState<BrewComment[]>([]);
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
 
-  async function load() {
-    try {
-      setComments(await fetchBrewComments(brewLogId));
-    } catch (err) {
-      notify(err instanceof Error ? err.message : "Could not load comments", "error");
-    } finally {
-      setLoading(false);
-    }
-  }
-
   useEffect(() => {
-    load();
+    let active = true;
+    fetchBrewComments(brewLogId)
+      .then((c) => active && setComments(c))
+      .catch((err) => active && notify(err instanceof Error ? err.message : "", "error"))
+      .finally(() => active && setLoading(false));
+    return () => { active = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [brewLogId]);
 
@@ -56,51 +40,39 @@ export default function BrewComments({ brewLogId }: { brewLogId: string }) {
       await deleteBrewComment(id);
       setComments((c) => c.filter((x) => x.id !== id));
     } catch (err) {
-      notify(err instanceof Error ? err.message : "Could not delete", "error");
+      notify(err instanceof Error ? err.message : "", "error");
     }
   }
 
-  // Group average across everyone who scored.
   const scored = comments.filter((c) => c.overall != null);
   const groupAvg: Record<string, number | null> = {};
-  for (const axis of TASTE_AXES) {
-    groupAvg[axis.key] = average(scored.map((c) => c[axis.key] as number | null));
-  }
+  for (const axis of TASTE_AXES) groupAvg[axis.key] = average(scored.map((c) => c[axis.key] as number | null));
 
   if (loading) {
     return (
       <div className="flex items-center gap-2 py-3 text-xs text-cream-mute">
-        <Spinner className="h-4 w-4 text-gold" /> Loading comments…
+        <Spinner className="h-4 w-4 text-gold" />
       </div>
     );
   }
 
   return (
-    <div className="mt-2 space-y-3">
+    <div className="mt-3 space-y-3">
       {scored.length > 1 && (
-        <div className="rounded-xl border border-gold/10 bg-espresso-900/40 p-2">
-          <p className="mb-1 flex items-center gap-1.5 px-1 text-[0.7rem] font-semibold uppercase tracking-wider text-gold/80">
-            <Users className="h-3.5 w-3.5" /> Group average · {scored.length} tasters
+        <div className="rounded-xl bg-espresso-700 p-2">
+          <p className="mb-1 flex items-center gap-1.5 px-1 text-2xs font-semibold uppercase tracking-wide text-gold/85">
+            <Users className="h-3.5 w-3.5" /> {t("comments.groupAvg", { n: scored.length })}
           </p>
-          <TasteRadar
-            height={220}
-            series={[{ name: "Group", color: "#E0B968", values: groupAvg }]}
-          />
+          <TasteRadar height={210} series={[{ name: "", color: "#E6C173", values: groupAvg }]} />
         </div>
       )}
 
-      {comments.map((c) => (
-        <CommentRow key={c.id} comment={c} onDelete={() => remove(c.id)} />
-      ))}
+      {comments.map((c) => <CommentRow key={c.id} comment={c} onDelete={() => remove(c.id)} />)}
 
-      {comments.length === 0 && (
-        <p className="text-xs text-cream-mute">
-          No opinions yet — be the first to weigh in.
-        </p>
-      )}
+      {comments.length === 0 && <p className="text-xs text-cream-mute">{t("comments.empty")}</p>}
 
-      <button onClick={() => setFormOpen(true)} className="btn-ghost w-full py-2 text-sm">
-        <MessageSquarePlus className="h-4 w-4" /> Add opinion
+      <button onClick={() => setFormOpen(true)} className="btn-ghost w-full">
+        <MessageSquarePlus className="h-4 w-4" /> {t("comments.add")}
       </button>
 
       <CommentForm
@@ -113,47 +85,27 @@ export default function BrewComments({ brewLogId }: { brewLogId: string }) {
   );
 }
 
-function CommentRow({
-  comment,
-  onDelete,
-}: {
-  comment: BrewComment;
-  onDelete: () => void;
-}) {
+function CommentRow({ comment, onDelete }: { comment: BrewComment; onDelete: () => void }) {
+  const t = useT();
   return (
-    <div className="rounded-xl border border-gold/10 bg-espresso-900/30 p-3">
+    <div className="rounded-xl bg-espresso-700 p-3">
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2">
           <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gold/15 text-xs font-bold text-gold">
             {comment.author.slice(0, 1).toUpperCase()}
           </span>
           <span className="font-semibold text-cream">{comment.author}</span>
-          {comment.overall != null && (
-            <span className="chip">★ {comment.overall}/5</span>
-          )}
+          {comment.overall != null && <span className="score">★ {comment.overall}/5</span>}
         </div>
-        <button
-          onClick={onDelete}
-          className="rounded-lg p-1 text-cream-mute transition hover:bg-red-500/15 hover:text-red-400"
-          aria-label="Delete comment"
-        >
+        <button onClick={onDelete} className="flex h-8 w-8 items-center justify-center text-cream-mute transition-colors hover:text-danger" aria-label={t("common.delete")}>
           <Trash2 className="h-3.5 w-3.5" />
         </button>
       </div>
-
-      {comment.comment && (
-        <p className="mt-2 text-sm text-cream-dim">{comment.comment}</p>
-      )}
-
+      {comment.comment && <p className="mt-2 text-sm leading-relaxed text-cream-dim">{comment.comment}</p>}
       {comment.overall != null && (
-        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[0.7rem] text-cream-mute">
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-2xs text-cream-mute">
           {TASTE_AXES.map((axis) => (
-            <span key={axis.key}>
-              {axis.label}{" "}
-              <span className="font-semibold text-gold">
-                {comment[axis.key] as number | null}
-              </span>
-            </span>
+            <span key={axis.key}>{t(`taste.${axis.key}` as const)} <span className="font-semibold text-gold tnum">{comment[axis.key] as number | null}</span></span>
           ))}
         </div>
       )}
@@ -162,16 +114,14 @@ function CommentRow({
 }
 
 function CommentForm({
-  open,
-  brewLogId,
-  onClose,
-  onSaved,
+  open, brewLogId, onClose, onSaved,
 }: {
   open: boolean;
   brewLogId: string;
   onClose: () => void;
   onSaved: (c: BrewComment) => void;
 }) {
+  const t = useT();
   const { notify } = useToast();
   const { profile } = useAuth();
   const [author, setAuthor] = useState("");
@@ -179,7 +129,6 @@ function CommentForm({
   const [scores, setScores] = useState<Scores>({ ...defaultScores });
   const [saving, setSaving] = useState(false);
 
-  // Reset each time it opens; prefill the name from the signed-in profile.
   const [wasOpen, setWasOpen] = useState(false);
   if (open && !wasOpen) {
     setAuthor(profile?.name ?? "");
@@ -190,7 +139,7 @@ function CommentForm({
   if (!open && wasOpen) setWasOpen(false);
 
   async function save() {
-    if (!author.trim()) return notify("Add your name first", "error");
+    if (!author.trim()) return notify(t("comments.errName"), "error");
     setSaving(true);
     try {
       const created = await createBrewComment({
@@ -199,11 +148,11 @@ function CommentForm({
         comment: comment || null,
         ...scores,
       });
-      notify("Opinion added");
+      notify(t("comments.added"));
       onSaved(created);
       onClose();
     } catch (err) {
-      notify(err instanceof Error ? err.message : "Could not save", "error");
+      notify(err instanceof Error ? err.message : "", "error");
     } finally {
       setSaving(false);
     }
@@ -213,54 +162,31 @@ function CommentForm({
     <Modal
       open={open}
       onClose={onClose}
-      title="Add your opinion"
-      subtitle="Score it your way"
+      title={t("comments.formTitle")}
+      subtitle={t("comments.formSubtitle")}
       footer={
         <>
-          <button className="btn-subtle" onClick={onClose} disabled={saving}>
-            Cancel
-          </button>
-          <button className="btn-gold" onClick={save} disabled={saving}>
-            {saving ? "Saving…" : "Post"}
-          </button>
+          <button className="btn-quiet flex-1" onClick={onClose} disabled={saving}>{t("common.cancel")}</button>
+          <button className="btn-primary flex-[2]" onClick={save} disabled={saving}>{saving ? t("common.saving") : t("common.post")}</button>
         </>
       }
     >
       <div className="space-y-4">
-        <Field label="Your name">
-          <TextInput
-            value={author}
-            onChange={(e) => setAuthor(e.target.value)}
-            placeholder="e.g. Pae"
-            autoFocus
-          />
+        <Field label={t("comments.fieldName")}>
+          <TextInput value={author} onChange={(e) => setAuthor(e.target.value)} placeholder={t("comments.phName")} autoFocus />
         </Field>
-        <Field label="Your opinion">
-          <TextArea
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            placeholder="Too bright for me, but lovely florals…"
-          />
+        <Field label={t("comments.fieldOpinion")} optionalText={t("common.optional")}>
+          <TextArea value={comment} onChange={(e) => setComment(e.target.value)} placeholder={t("comments.phOpinion")} />
         </Field>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="space-y-3">
-            <p className="eyebrow">Your scores · 1–5</p>
-            {TASTE_AXES.map((axis) => (
-              <ScoreSlider
-                key={axis.key}
-                label={axis.label}
-                value={scores[axis.key]}
-                onChange={(v) => setScores((s) => ({ ...s, [axis.key]: v }))}
-              />
-            ))}
-          </div>
-          <div className="rounded-2xl border border-gold/10 bg-espresso-900/40 p-2">
-            <TasteRadar
-              height={230}
-              series={[{ name: "You", color: "#C8963A", values: scores }]}
-            />
-          </div>
+        <div className="rounded-2xl bg-espresso-700 p-2">
+          <TasteRadar height={200} series={[{ name: "", color: "#C8963A", values: scores }]} />
+        </div>
+        <div className="space-y-3">
+          <p className="text-sm font-semibold text-cream-dim">{t("comments.scores")}</p>
+          {TASTE_AXES.map((axis) => (
+            <ScoreSlider key={axis.key} label={t(`taste.${axis.key}` as const)} value={scores[axis.key]} onChange={(v) => setScores((s) => ({ ...s, [axis.key]: v }))} />
+          ))}
         </div>
       </div>
     </Modal>
