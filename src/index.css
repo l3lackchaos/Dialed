@@ -1,0 +1,145 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-espresso text-cream font-sans antialiased;
+    /* Layered warmth: a faint gold glow up top over the espresso base,
+       plus an ultra-subtle paper grain so it reads like a notebook, not a template. */
+    background-color: #140c05;
+    background-image:
+      radial-gradient(
+        120% 80% at 50% -10%,
+        rgba(200, 150, 58, 0.1) 0%,
+        rgba(20, 12, 5, 0) 55%
+      ),
+      radial-gradient(
+        90% 60% at 100% 0%,
+        rgba(160, 118, 42, 0.07) 0%,
+        rgba(20, 12, 5, 0) 50%
+      );
+    background-attachment: fixed;
+  }
+
+  /* Thin gold scrollbar to match the theme */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(200, 150, 58, 0.4) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: rgba(200, 150, 58, 0.35);
+    border-radius: 999px;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display;
+  }
+
+  /* Native form controls inherit the warm palette */
+  select option {
+    background-color: #1a1107;
+    color: #f0e4cc;
+  }
+}
+
+@layer components {
+  /* Frosted notebook card */
+  .card {
+    @apply rounded-2xl border border-gold/15 bg-espresso-800/70 shadow-card backdrop-blur-sm;
+  }
+
+  .card-hover {
+    @apply transition-all duration-200 hover:border-gold/40 hover:shadow-gold;
+  }
+
+  /* Section eyebrow label */
+  .eyebrow {
+    @apply text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-gold/80;
+  }
+
+  /* Inputs */
+  .field-label {
+    @apply mb-1.5 block text-xs font-medium uppercase tracking-wider text-cream-dim;
+  }
+
+  .input {
+    @apply w-full rounded-xl border border-gold/15 bg-espresso-900/60 px-3.5 py-2.5 text-[0.95rem] text-cream
+      placeholder:text-cream-mute/60 outline-none transition
+      focus:border-gold/60 focus:ring-2 focus:ring-gold/20;
+  }
+
+  .input-sm {
+    @apply rounded-lg border border-gold/15 bg-espresso-900/60 px-2.5 py-1.5 text-sm text-cream
+      placeholder:text-cream-mute/60 outline-none transition
+      focus:border-gold/60 focus:ring-2 focus:ring-gold/20;
+  }
+
+  /* Buttons */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold
+      transition-all duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-gold {
+    @apply btn bg-gold-sheen text-espresso-900 shadow-gold hover:brightness-110;
+  }
+
+  .btn-ghost {
+    @apply btn border border-gold/25 bg-transparent text-cream hover:bg-gold/10;
+  }
+
+  .btn-subtle {
+    @apply btn bg-espresso-700/60 text-cream-dim hover:bg-espresso-600 hover:text-cream;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full border border-gold/25 bg-gold/10 px-2.5 py-0.5
+      text-[0.7rem] font-medium tracking-wide text-gold-light;
+  }
+
+  /* Range slider — gold themed */
+  .slider {
+    @apply h-1.5 w-full cursor-pointer appearance-none rounded-full bg-espresso-600;
+    accent-color: #c8963a;
+  }
+  .slider::-webkit-slider-thumb {
+    @apply h-5 w-5 appearance-none rounded-full;
+    background: linear-gradient(135deg, #e0b968, #a2762a);
+    border: 2px solid #140c05;
+    box-shadow: 0 0 0 1px rgba(200, 150, 58, 0.5);
+    margin-top: -1px;
+  }
+  .slider::-moz-range-thumb {
+    @apply h-5 w-5 rounded-full border-0;
+    background: linear-gradient(135deg, #e0b968, #a2762a);
+    box-shadow: 0 0 0 1px rgba(200, 150, 58, 0.5);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  /* Respect notched phones */
+  .safe-bottom {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem);
+  }
+}

@@ -1,0 +1,119 @@
+import { supabase } from "./supabase";
+import type {
+  Bean,
+  BeanInsert,
+  BrewLog,
+  BrewLogInsert,
+  BrewLogWithRecipe,
+  Recipe,
+  RecipeInsert,
+  RecipeWithBean,
+} from "./types";
+
+function unwrap<T>(res: { data: T | null; error: { message: string } | null }): T {
+  if (res.error) throw new Error(res.error.message);
+  return res.data as T;
+}
+
+/* ----------------------------- Beans ----------------------------- */
+
+export async function fetchBeans(): Promise<Bean[]> {
+  return unwrap(
+    await supabase.from("beans").select("*").order("created_at", { ascending: false }),
+  );
+}
+
+export async function createBean(payload: BeanInsert): Promise<Bean> {
+  return unwrap(await supabase.from("beans").insert(payload).select().single());
+}
+
+export async function updateBean(id: string, payload: Partial<BeanInsert>): Promise<Bean> {
+  return unwrap(
+    await supabase.from("beans").update(payload).eq("id", id).select().single(),
+  );
+}
+
+export async function deleteBean(id: string): Promise<void> {
+  const { error } = await supabase.from("beans").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+/* ---------------------------- Recipes ---------------------------- */
+
+export async function fetchRecipes(): Promise<RecipeWithBean[]> {
+  return unwrap(
+    await supabase
+      .from("recipes")
+      .select("*, bean:beans(*)")
+      .order("created_at", { ascending: false }),
+  ) as RecipeWithBean[];
+}
+
+export async function fetchFavoriteRecipes(): Promise<RecipeWithBean[]> {
+  return unwrap(
+    await supabase
+      .from("recipes")
+      .select("*, bean:beans(*)")
+      .eq("is_favorite", true)
+      .order("created_at", { ascending: false }),
+  ) as RecipeWithBean[];
+}
+
+export async function createRecipe(payload: RecipeInsert): Promise<Recipe> {
+  return unwrap(await supabase.from("recipes").insert(payload).select().single());
+}
+
+export async function updateRecipe(
+  id: string,
+  payload: Partial<RecipeInsert>,
+): Promise<Recipe> {
+  return unwrap(
+    await supabase.from("recipes").update(payload).eq("id", id).select().single(),
+  );
+}
+
+export async function toggleRecipeFavorite(
+  id: string,
+  isFavorite: boolean,
+): Promise<void> {
+  const { error } = await supabase
+    .from("recipes")
+    .update({ is_favorite: isFavorite })
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+export async function deleteRecipe(id: string): Promise<void> {
+  const { error } = await supabase.from("recipes").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+/* --------------------------- Brew logs --------------------------- */
+
+export async function fetchBrewLogs(): Promise<BrewLogWithRecipe[]> {
+  return unwrap(
+    await supabase
+      .from("brew_logs")
+      .select("*, recipe:recipes(*, bean:beans(*))")
+      .order("brew_date", { ascending: false })
+      .order("created_at", { ascending: false }),
+  ) as BrewLogWithRecipe[];
+}
+
+export async function createBrewLog(payload: BrewLogInsert): Promise<BrewLog> {
+  return unwrap(await supabase.from("brew_logs").insert(payload).select().single());
+}
+
+export async function updateBrewLog(
+  id: string,
+  payload: Partial<BrewLogInsert>,
+): Promise<BrewLog> {
+  return unwrap(
+    await supabase.from("brew_logs").update(payload).eq("id", id).select().single(),
+  );
+}
+
+export async function deleteBrewLog(id: string): Promise<void> {
+  const { error } = await supabase.from("brew_logs").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+}
