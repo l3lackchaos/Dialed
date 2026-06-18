@@ -38,6 +38,18 @@ At-a-glance home: bean/brew counts, **Quick Log** buttons for pinned recipes, a
 **radar chart of each bean's average tasting profile** (toggle beans on/off to
 compare), the bean shelf, and your most recent brews.
 
+### 5 · Shared tasting sessions
+Every brew log is a shareable **session**. Tap **Share** to push the session
+link into **LINE**, copy it, or show a **QR code** to scan in person. Anyone who
+opens the link lands on a public session page (`/s/:id`) and can leave their own
+opinion — **no login required**. Each comment carries a name, an opinion, and
+that person's own 1–5 scores, and the group's average is plotted on a radar.
+
+### 6 · Google sign-in & quick profile
+Optional **Google login** (Supabase Auth). Signing in creates a quick profile
+(name + avatar) that **pre-fills your name** when you add an opinion, so logging
+is one tap faster. Login is purely additive — anonymous tasting still works.
+
 ---
 
 ## Tech Stack
@@ -48,6 +60,8 @@ compare), the bean shelf, and your most recent brews.
 | Styling   | Tailwind CSS (custom espresso/gold theme) |
 | Charts    | Recharts (tasting radar)                  |
 | Database  | Supabase (Postgres + RLS)                 |
+| Auth      | Supabase Auth — Google OAuth (optional)   |
+| Sharing   | Web Share API · LINE · `qrcode.react`     |
 | Icons     | lucide-react                              |
 | Fonts     | Fraunces (display) · Inter (body)         |
 
@@ -55,16 +69,39 @@ compare), the bean shelf, and your most recent brews.
 
 ## Database
 
-Three tables linked by foreign keys (`on delete cascade`):
+Four tables linked by foreign keys (`on delete cascade`):
 
 ```
-beans ──1:N──▶ recipes ──1:N──▶ brew_logs
+beans ──1:N──▶ recipes ──1:N──▶ brew_logs ──1:N──▶ brew_comments
 ```
 
-The schema lives in [`supabase/migrations/0001_dialed_coffee_schema.sql`](supabase/migrations/0001_dialed_coffee_schema.sql).
-RLS is enabled on all three tables with permissive policies (this is a personal,
-single-user notebook with no auth). If you add Supabase Auth later, tighten the
-policies to scope rows to `auth.uid()`.
+Migrations live in [`supabase/migrations/`](supabase/migrations/):
+`0001_dialed_coffee_schema.sql` (beans/recipes/brew_logs) and
+`0002_brew_comments.sql` (multi-taster comments).
+
+RLS is enabled on every table with **permissive policies** — intentional, so
+the share-and-comment flow works for anonymous tasters. Google login is an
+optional convenience, not a gate. If you later want to scope data per user,
+tighten the policies to `auth.uid()`.
+
+### Google sign-in setup
+
+Google login needs the provider enabled in your Supabase project (this is
+dashboard config — it can't be scripted):
+
+1. **Google Cloud Console** → create an *OAuth 2.0 Client ID* (Web application).
+   Add this authorized redirect URI:
+   `https://<your-project-ref>.supabase.co/auth/v1/callback`
+2. **Supabase Dashboard** → *Authentication → Providers → Google* → paste the
+   Client ID and Secret, enable it.
+3. **Supabase Dashboard** → *Authentication → URL Configuration* → add your app
+   origin(s) (e.g. `http://localhost:5173` and your Vercel URL) to
+   *Site URL* / *Redirect URLs*.
+
+Full guide: <https://supabase.com/docs/guides/auth/social-login/auth-google>
+
+Until this is configured, the app runs fine anonymously — the Sign in button
+just won't complete.
 
 ---
 

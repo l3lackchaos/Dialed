@@ -8,8 +8,10 @@ import {
   ArrowRight,
   MessageSquare,
   ChevronDown,
+  Share2,
 } from "lucide-react";
 import BrewComments from "../components/BrewComments";
+import ShareSession from "../components/ShareSession";
 import { useQuery } from "../hooks/useQuery";
 import { fetchBrewLogs, fetchRecipes, deleteBrewLog } from "../lib/queries";
 import { formatDate } from "../lib/format";
@@ -158,6 +160,7 @@ function LogCard({
   onDelete: () => void;
 }) {
   const [showComments, setShowComments] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   return (
     <article className="card card-hover p-4">
       <div className="flex items-start justify-between gap-3">
@@ -176,6 +179,13 @@ function LogCard({
               <span className="text-[0.65rem] font-normal text-gold/70">/5</span>
             </span>
           )}
+          <button
+            onClick={() => setShareOpen(true)}
+            className="rounded-lg p-1.5 text-cream-mute transition hover:bg-gold/10 hover:text-gold"
+            aria-label="Share session"
+          >
+            <Share2 className="h-4 w-4" />
+          </button>
           <button
             onClick={onEdit}
             className="rounded-lg p-1.5 text-cream-mute transition hover:bg-gold/10 hover:text-gold"
@@ -254,6 +264,13 @@ function LogCard({
         </button>
         {showComments && <BrewComments brewLogId={log.id} />}
       </div>
+
+      <ShareSession
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        logId={log.id}
+        title={`${log.recipe?.name ?? "Brew"} · ${log.recipe?.bean?.name ?? ""}`}
+      />
     </article>
   );
 }

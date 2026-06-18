@@ -102,6 +102,16 @@ export async function fetchBrewLogs(): Promise<BrewLogWithRecipe[]> {
   ) as BrewLogWithRecipe[];
 }
 
+export async function fetchBrewLog(id: string): Promise<BrewLogWithRecipe> {
+  return unwrap(
+    await supabase
+      .from("brew_logs")
+      .select("*, recipe:recipes(*, bean:beans(*))")
+      .eq("id", id)
+      .single(),
+  ) as BrewLogWithRecipe;
+}
+
 export async function createBrewLog(payload: BrewLogInsert): Promise<BrewLog> {
   return unwrap(await supabase.from("brew_logs").insert(payload).select().single());
 }

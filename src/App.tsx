@@ -4,6 +4,8 @@ import Dashboard from "./pages/Dashboard";
 import Beans from "./pages/Beans";
 import Recipes from "./pages/Recipes";
 import BrewLogs from "./pages/BrewLogs";
+import Session from "./pages/Session";
+import AccountButton from "./components/AccountButton";
 
 const NAV = [
   { to: "/", label: "Home", icon: LayoutDashboard, end: true },
@@ -23,6 +25,7 @@ export default function App() {
           <Route path="/beans" element={<Beans />} />
           <Route path="/recipes" element={<Recipes />} />
           <Route path="/logs" element={<BrewLogs />} />
+          <Route path="/s/:logId" element={<Session />} />
         </Routes>
       </main>
 
@@ -45,6 +48,9 @@ function BrandBar() {
           <p className="mt-0.5 text-[0.65rem] uppercase tracking-[0.25em] text-gold/70">
             Pour-Over Notebook
           </p>
+        </div>
+        <div className="ml-auto">
+          <AccountButton />
         </div>
       </div>
     </header>

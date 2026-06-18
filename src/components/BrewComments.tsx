@@ -12,6 +12,7 @@ import {
   deleteBrewComment,
 } from "../lib/queries";
 import { useToast } from "./Toast";
+import { useAuth } from "./Auth";
 import type { BrewComment } from "../lib/types";
 
 type Scores = Record<(typeof TASTE_AXES)[number]["key"], number>;
@@ -172,15 +173,16 @@ function CommentForm({
   onSaved: (c: BrewComment) => void;
 }) {
   const { notify } = useToast();
+  const { profile } = useAuth();
   const [author, setAuthor] = useState("");
   const [comment, setComment] = useState("");
   const [scores, setScores] = useState<Scores>({ ...defaultScores });
   const [saving, setSaving] = useState(false);
 
-  // Reset each time it opens.
+  // Reset each time it opens; prefill the name from the signed-in profile.
   const [wasOpen, setWasOpen] = useState(false);
   if (open && !wasOpen) {
-    setAuthor("");
+    setAuthor(profile?.name ?? "");
     setComment("");
     setScores({ ...defaultScores });
     setWasOpen(true);
