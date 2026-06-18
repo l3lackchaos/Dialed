@@ -12,6 +12,7 @@ Supabase, and Vercel deploy.
 | `deploy-to-vercel` | **Deploy** / hosting on Vercel | vercel-labs/agent-skills |
 | `supabase` | Anything Supabase (DB, Auth, RLS, migrations, client libs) | supabase/agent-skills |
 | `supabase-postgres-best-practices` | Postgres query/schema optimization | supabase/agent-skills |
+| `find-skills` | Discover & install more skills from the ecosystem | vercel-labs/skills |
 | `ponytail` (+ `-audit`, `-debt`, `-help`, `-review`) | Lazy-senior-dev mode: YAGNI, stdlib first, shortest diff | [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) (MIT) |
 
 > Skills run with full agent permissions. Review before use.
