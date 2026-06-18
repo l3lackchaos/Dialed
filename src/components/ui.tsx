@@ -119,21 +119,27 @@ export function EmptyState({
 
 /* ----------------------------- Page chrome ----------------------------- */
 
-/** Title row for the main tab pages. */
+/** Editorial masthead row for the main tab pages — big serif title over a rule. */
 export function TabHeader({
   title,
+  kicker,
   action,
 }: {
   title: string;
+  kicker?: string;
   action?: ReactNode;
 }) {
   return (
-    <div className="mb-5 flex items-center justify-between gap-4">
-      <h1 className="font-display text-[1.7rem] font-semibold tracking-tight text-cream">
-        {title}
-      </h1>
-      {action}
-    </div>
+    <header className="mb-6">
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          {kicker && <p className="kicker mb-1.5">{kicker}</p>}
+          <h1 className="mast text-[2.1rem]">{title}</h1>
+        </div>
+        {action}
+      </div>
+      <div className="mt-3 h-px bg-cream/15" />
+    </header>
   );
 }
 
@@ -165,9 +171,7 @@ export function FormScreen({
             <ChevronLeft className="h-5 w-5" />
             <span className="text-sm font-medium">{closeLabel}</span>
           </button>
-          <h2 className="flex-1 truncate text-center text-base font-semibold text-cream">
-            {title}
-          </h2>
+          <h2 className="mast flex-1 truncate text-center text-lg">{title}</h2>
           <div className="h-10 w-16" aria-hidden />
         </div>
       </header>

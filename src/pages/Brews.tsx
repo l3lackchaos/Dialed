@@ -108,12 +108,12 @@ function LogCard({
   const click = log.click_setting ?? log.recipe?.click_setting;
 
   return (
-    <div className="surface p-4">
+    <div className="surface p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="truncate font-semibold text-cream">{log.recipe?.name ?? t("common.none")}</h3>
-          <p className="mt-0.5 text-sm text-gold">{log.recipe?.bean?.name ?? t("common.none")}</p>
-          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-2xs text-cream-mute">
+          <p className="kicker">{log.recipe?.bean?.name ?? t("common.none")}</p>
+          <h3 className="mast mt-1 truncate text-lg">{log.recipe?.name ?? t("common.none")}</h3>
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-2xs uppercase tracking-wide text-cream-mute">
             <span>{formatDate(log.brew_date)}</span>
             {log.actual_time && <span className="flex items-center gap-1 tnum"><Timer className="h-3 w-3" /> {log.actual_time}</span>}
           </div>
@@ -132,7 +132,7 @@ function LogCard({
       </div>
 
       {(log.recipe?.dripper || grinder || click) && (
-        <div className="mt-2.5 flex flex-wrap gap-1.5">
+        <div className="mt-3 flex flex-wrap gap-1.5 border-t border-cream/15 pt-3">
           {log.recipe?.dripper && <span className="tag">{log.recipe.dripper}</span>}
           {grinder && <span className="tag">{grinder}</span>}
           {click && <span className="tag">{click}</span>}
@@ -140,7 +140,7 @@ function LogCard({
         </div>
       )}
 
-      <div className="mt-3 border-t border-cream/10 pt-3">
+      <div className="mt-3 border-t border-cream/15 pt-3">
         <button onClick={() => setShowComments((s) => !s)} className="flex w-full items-center justify-between text-sm font-medium text-gold transition-colors hover:text-gold-dark">
           <span className="flex items-center gap-2"><MessageSquare className="h-4 w-4" /> {t("comments.title")}</span>
           <ChevronDown className={`h-4 w-4 transition-transform ${showComments ? "rotate-180" : ""}`} />

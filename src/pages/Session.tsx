@@ -59,16 +59,15 @@ function SessionBody({ log, onShare }: { log: BrewLogWithRecipe; onShare: () => 
   return (
     <div className="animate-fade-up space-y-5">
       <div className="surface p-5">
-        <p className="text-2xs font-semibold uppercase tracking-wide text-gold">{t("session.title")}</p>
-        <h1 className="mt-1 font-display text-2xl font-semibold text-cream">{log.recipe?.name ?? "—"}</h1>
-        <p className="mt-0.5 text-gold">{log.recipe?.bean?.name ?? "—"}</p>
+        <p className="kicker">{t("session.title")} · {log.recipe?.bean?.name ?? "—"}</p>
+        <h1 className="mast mt-1.5 text-[1.7rem]">{log.recipe?.name ?? "—"}</h1>
 
-        <div className="mt-3 flex flex-wrap items-center gap-2 text-2xs text-cream-mute">
+        <div className="mt-2 flex flex-wrap items-center gap-2 text-2xs uppercase tracking-wide text-cream-mute">
           <span>{formatDate(log.brew_date)}</span>
           {log.actual_time && <span className="flex items-center gap-1 tnum"><Timer className="h-3.5 w-3.5 text-gold" /> {log.actual_time}</span>}
         </div>
 
-        <div className="mt-3 flex flex-wrap gap-1.5">
+        <div className="mt-3 flex flex-wrap gap-1.5 border-t border-cream/15 pt-3">
           {log.recipe?.dripper && <span className="tag">{log.recipe.dripper}</span>}
           {grinder && <span className="tag">{grinder}</span>}
           {click && <span className="tag">{click}</span>}

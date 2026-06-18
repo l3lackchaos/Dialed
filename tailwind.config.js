@@ -9,22 +9,27 @@ export default {
         // Token names kept (espresso/cream/gold) so the ramp swap is centralized:
         //   espresso = light surfaces · cream = ink · gold = olive "origin" accent.
         espresso: {
-          DEFAULT: "#F2F1EC", // body / page
-          900: "#FBFBF8", // near-white (nav, text-on-accent)
-          800: "#FFFFFF", // cards / raised surface
-          700: "#ECEBE4", // fields, insets, quiet buttons
-          600: "#DEDDD3", // slider track, hover
-          500: "#CCCABE",
+          DEFAULT: "#F1EFE7", // warm editorial paper (kept low chroma, not beige-AI)
+          900: "#FBFAF6", // near-white (nav, text-on-accent)
+          800: "#FCFBF7", // "card" paper — barely raised, defined by rules not boxes
+          700: "#EAE7DC", // fields, insets, quiet buttons
+          600: "#DCD8CB", // slider track, hover, rules-strong
+          500: "#C7C2B2",
         },
         cream: {
-          DEFAULT: "#23241D", // primary ink (~14:1 on white)
-          dim: "#55564C", // secondary text (AA ~7:1)
-          mute: "#888577", // tertiary (timestamps) ~3.6:1
+          DEFAULT: "#211F18", // ink (~15:1 on paper)
+          dim: "#535046", // secondary text (AA ~7:1)
+          mute: "#888473", // tertiary (timestamps) ~3.6:1
         },
         gold: {
-          DEFAULT: "#47632F", // olive "origin" accent (~5.3:1 on white)
-          light: "#5C7C43", // hover
-          dark: "#37501F", // press / stronger text
+          DEFAULT: "#47632F", // olive — structure, primary action, selection
+          light: "#5C7C43",
+          dark: "#37501F",
+        },
+        // Rust "data ink" — for the hero numbers (ratio, scores). A second editorial voice.
+        rust: {
+          DEFAULT: "#A8472A",
+          dark: "#83351E",
         },
         danger: {
           DEFAULT: "#BC3B2C",
@@ -34,18 +39,22 @@ export default {
       fontFamily: {
         display: ['"Fraunces"', "Georgia", "serif"],
         sans: ['"Inter"', "system-ui", "sans-serif"],
+        mono: ['"IBM Plex Mono"', "ui-monospace", "SFMono-Regular", "monospace"],
       },
       fontSize: {
         "2xs": ["0.6875rem", { lineHeight: "1rem" }],
       },
       borderRadius: {
-        xl: "0.875rem",
-        "2xl": "1.125rem",
+        // Editorial = sharper. Knock the soft-app roundness back.
+        lg: "0.375rem",
+        xl: "0.4375rem",
+        "2xl": "0.5rem",
       },
       boxShadow: {
-        raise: "0 1px 2px rgba(35,36,29,0.05), 0 12px 26px -16px rgba(35,36,29,0.18)",
-        gold: "0 8px 20px -8px rgba(71,99,47,0.40)",
-        pop: "0 18px 46px -18px rgba(35,36,29,0.28)",
+        // Flat by default — depth comes from hairline rules, not drop shadows.
+        raise: "0 1px 0 0 rgba(33,31,24,0.03)",
+        gold: "0 4px 14px -6px rgba(71,99,47,0.4)",
+        pop: "0 20px 48px -20px rgba(33,31,24,0.35)",
       },
       transitionTimingFunction: {
         "out-quart": "cubic-bezier(0.25, 1, 0.5, 1)",

@@ -104,11 +104,11 @@ export default function Recipes() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Spec({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg bg-espresso-700 px-2.5 py-1.5">
-      <p className="text-2xs text-cream-mute">{label}</p>
-      <p className="mt-0.5 text-sm font-semibold text-cream tnum">{value}</p>
+    <div className="min-w-0">
+      <dt className="kicker">{label}</dt>
+      <dd className="mt-0.5 truncate text-sm text-cream tnum">{value}</dd>
     </div>
   );
 }
@@ -130,13 +130,14 @@ function RecipeRow({
   const steps = parsePourSchedule(recipe.pour_schedule);
 
   return (
-    <div className="surface p-4">
+    <article className="surface p-5">
+      {/* Masthead */}
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="truncate text-[1.05rem] font-semibold text-cream">{recipe.name}</h3>
-          <p className="mt-0.5 text-sm text-gold/85">{recipe.bean?.name ?? t("common.none")}</p>
+          <p className="kicker">{recipe.bean?.name ?? t("common.none")}</p>
+          <h3 className="mast mt-1 text-xl">{recipe.name}</h3>
         </div>
-        <div className="flex shrink-0 items-center">
+        <div className="-mr-1.5 -mt-1 flex shrink-0 items-center">
           <button onClick={onToggleFav} className="flex h-9 w-9 items-center justify-center text-cream-mute transition-colors hover:text-gold" aria-label={t("recipes.favorite")}>
             <Star className={`h-5 w-5 ${recipe.is_favorite ? "fill-gold text-gold" : ""}`} />
           </button>
@@ -149,56 +150,64 @@ function RecipeRow({
         </div>
       </div>
 
-      {(recipe.dripper || recipe.grinder || recipe.click_setting) && (
-        <div className="mt-2.5 flex flex-wrap gap-1.5">
-          {recipe.dripper && <span className="tag">{recipe.dripper}</span>}
-          {recipe.grinder && <span className="tag">{recipe.grinder}</span>}
-          {recipe.click_setting && <span className="tag">{recipe.click_setting}</span>}
+      {/* Ratio hero band */}
+      <div className="mt-4 flex items-end justify-between border-t border-cream/15 pt-3">
+        <div>
+          <p className="kicker">{t("recipes.statRatio")}</p>
+          <p className="font-mono text-[2.4rem] font-medium leading-none text-rust tnum">{recipe.ratio ?? "—"}</p>
         </div>
-      )}
-
-      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <Stat label={t("recipes.statDoseWater")} value={`${recipe.dose_g ?? "–"}/${recipe.water_g ?? "–"}g`} />
-        <Stat label={t("recipes.statRatio")} value={recipe.ratio ?? "—"} />
-        <Stat label={t("recipes.statTemp")} value={recipe.water_temp ? `${recipe.water_temp}°C` : "—"} />
-        <Stat label={t("recipes.statTarget")} value={recipe.target_time ?? "—"} />
+        <div className="text-right">
+          <p className="kicker">{t("recipes.statDoseWater")}</p>
+          <p className="mt-1 text-lg text-cream tnum">{recipe.dose_g ?? "–"} · {recipe.water_g ?? "–"} g</p>
+        </div>
       </div>
 
+      {/* Spec sheet */}
+      <dl className="mt-4 grid grid-cols-3 gap-x-4 gap-y-3 border-t border-cream/15 pt-3">
+        <Spec label={t("recipes.fieldDripper")} value={recipe.dripper ?? "—"} />
+        <Spec label={t("recipes.fieldGrinder")} value={recipe.grinder ?? "—"} />
+        <Spec label={t("recipes.fieldClick")} value={recipe.click_setting ?? "—"} />
+        <Spec label={t("recipes.statTemp")} value={recipe.water_temp ? `${recipe.water_temp}°C` : "—"} />
+        <Spec label={t("recipes.statTarget")} value={recipe.target_time ?? "—"} />
+      </dl>
+
       {steps.length > 0 && (
-        <details className="group mt-3">
-          <summary className="cursor-pointer list-none text-sm font-medium text-gold/85 transition-colors hover:text-gold">
-            {t("recipes.scheduleN", { n: steps.length })}
+        <details className="group mt-4 border-t border-cream/15 pt-3">
+          <summary className="kicker cursor-pointer list-none text-cream-dim transition-colors hover:text-gold">
+            {t("recipes.scheduleN", { n: steps.length })} ▸
           </summary>
-          <div className="mt-2 overflow-hidden rounded-lg border border-cream/10">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-espresso-700 text-2xs uppercase tracking-wide text-cream-dim">
-                <tr>
-                  <th className="px-2.5 py-1.5 font-semibold">{t("pour.pour")}</th>
-                  <th className="px-2.5 py-1.5 font-semibold">{t("pour.cumulative")}</th>
-                  <th className="px-2.5 py-1.5 font-semibold">{t("pour.time")}</th>
-                  <th className="px-2.5 py-1.5 font-semibold">{t("pour.note")}</th>
+          <table className="mt-2 w-full text-left text-sm">
+            <thead className="kicker text-cream-mute">
+              <tr className="border-b border-cream/15">
+                <th className="py-1.5 pr-2 font-semibold">{t("pour.pour")}</th>
+                <th className="py-1.5 pr-2 font-semibold">{t("pour.cumulative")}</th>
+                <th className="py-1.5 pr-2 font-semibold">{t("pour.time")}</th>
+                <th className="py-1.5 font-semibold">{t("pour.note")}</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-cream/10">
+              {steps.map((s, i) => (
+                <tr key={i} className="text-cream-dim">
+                  <td className="py-1.5 pr-2 text-cream">{s.pour || "—"}</td>
+                  <td className="py-1.5 pr-2 tnum">{s.cumulative_g || "—"}</td>
+                  <td className="py-1.5 pr-2 tnum">{s.time || "—"}</td>
+                  <td className="py-1.5">{s.note || "—"}</td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-cream/8">
-                {steps.map((s, i) => (
-                  <tr key={i} className="text-cream-dim">
-                    <td className="px-2.5 py-1.5 text-cream">{s.pour || "—"}</td>
-                    <td className="px-2.5 py-1.5 tnum">{s.cumulative_g || "—"}</td>
-                    <td className="px-2.5 py-1.5 tnum">{s.time || "—"}</td>
-                    <td className="px-2.5 py-1.5">{s.note || "—"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </details>
       )}
 
-      {recipe.notes && <p className="mt-3 text-sm italic leading-relaxed text-cream-dim">{recipe.notes}</p>}
+      {recipe.notes && (
+        <p className="mt-4 border-t border-cream/15 pt-3 font-display text-[0.95rem] italic leading-relaxed text-cream-dim">
+          {recipe.notes}
+        </p>
+      )}
 
-      <button onClick={onLog} className="btn-ghost mt-3 w-full">
+      <button onClick={onLog} className="btn-ghost mt-4 w-full">
         <PlayCircle className="h-4 w-4" /> {t("recipes.logThis")}
       </button>
-    </div>
+    </article>
   );
 }

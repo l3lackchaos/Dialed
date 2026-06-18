@@ -15,13 +15,13 @@
 
   body {
     @apply bg-espresso text-cream font-sans antialiased;
-    /* Daylight: a faint olive wash high on a clean cool-paper base.
-       Warmth/character comes from the accent + serif, never a beige bg. */
-    background-color: #f2f1ec;
+    /* Warm editorial paper, a faint olive wash at the masthead. Character lives
+       in the type and rules, not in a tinted bg. */
+    background-color: #f1efe7;
     background-image: radial-gradient(
-      120% 70% at 50% -15%,
-      rgba(71, 99, 47, 0.06) 0%,
-      rgba(242, 241, 236, 0) 55%
+      120% 60% at 50% -10%,
+      rgba(71, 99, 47, 0.05) 0%,
+      rgba(241, 239, 231, 0) 50%
     );
     background-attachment: fixed;
     -webkit-tap-highlight-color: transparent;
@@ -30,83 +30,105 @@
   h1,
   h2,
   h3 {
+    @apply font-display;
     text-wrap: balance;
+    letter-spacing: -0.02em;
   }
 
-  /* Numbers (doses, ratios, scores, times) align in tabular columns */
+  /* Numbers read as lab/ledger data: monospace + tabular. Serif headings keep
+     their face (the font utility in the utilities layer wins over this). */
   .tnum {
+    @apply font-mono;
     font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
   }
 
   select option {
-    background-color: #ffffff;
-    color: #23241d;
+    background-color: #fcfbf7;
+    color: #211f18;
   }
 
-  /* Always-visible, keyboard-friendly focus */
   :focus-visible {
     outline: 2px solid rgba(71, 99, 47, 0.7);
     outline-offset: 2px;
-    border-radius: 4px;
+    border-radius: 2px;
   }
 
   * {
     scrollbar-width: thin;
-    scrollbar-color: rgba(71, 99, 47, 0.35) transparent;
+    scrollbar-color: rgba(71, 99, 47, 0.3) transparent;
   }
   *::-webkit-scrollbar {
     width: 7px;
     height: 7px;
   }
   *::-webkit-scrollbar-thumb {
-    background: rgba(71, 99, 47, 0.3);
+    background: rgba(71, 99, 47, 0.28);
     border-radius: 999px;
   }
 }
 
 @layer components {
-  /* Solid raised surface — not glass. Used sparingly, never nested. */
-  .surface {
-    @apply rounded-2xl border border-cream/10 bg-espresso-800 shadow-raise;
+  /* Editorial devices ------------------------------------------------ */
+
+  /* Masthead / page title */
+  .mast {
+    @apply font-display font-semibold text-cream;
+    letter-spacing: -0.03em;
+    line-height: 0.95;
   }
 
-  /* Form controls — large targets, AA contrast, consistent across the app */
+  /* Small-caps category label — the journal's voice, used deliberately */
+  .kicker {
+    @apply text-2xs font-semibold uppercase text-cream-mute;
+    letter-spacing: 0.16em;
+  }
+
+  /* Hairline rule */
+  .rule {
+    @apply border-cream/10;
+  }
+
+  /* A page "leaf" — paper on paper, defined by a hairline, not a heavy box */
+  .surface {
+    @apply rounded-xl border border-cream/10 bg-espresso-800 shadow-raise;
+  }
+
+  /* Form controls */
   .label {
-    @apply mb-1.5 block text-sm font-medium text-cream-dim;
+    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wider text-cream-dim;
   }
 
   .field {
-    @apply w-full rounded-xl border border-cream/10 bg-espresso-700 px-3.5 text-[1rem] text-cream
-      placeholder:text-cream-mute outline-none transition-colors duration-150
+    @apply w-full rounded-lg border border-cream/10 bg-espresso-800 px-3.5 text-[1rem] text-cream
+      placeholder:text-cream-mute/80 outline-none transition-colors duration-150
       focus:border-gold/70;
     min-height: 48px;
   }
-
   textarea.field {
     @apply py-3 leading-relaxed;
     min-height: 96px;
     resize: vertical;
   }
-
   select.field {
     @apply appearance-none pr-10;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23888577' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23888473' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.75rem center;
   }
 
   /* Buttons */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 text-[0.95rem] font-semibold
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 text-[0.9rem] font-semibold
       transition-all duration-150 ease-out-quart
       active:scale-[0.98] disabled:pointer-events-none disabled:opacity-45;
     min-height: 48px;
   }
   .btn-primary {
-    @apply btn bg-gold text-espresso-900 shadow-gold hover:bg-gold-light;
+    @apply btn bg-gold text-espresso-900 hover:bg-gold-light;
   }
   .btn-ghost {
-    @apply btn border border-cream/20 bg-transparent text-cream hover:border-gold/50 hover:bg-gold/5;
+    @apply btn border border-cream/25 bg-transparent text-cream hover:border-gold hover:text-gold;
   }
   .btn-quiet {
     @apply btn bg-espresso-700 text-cream-dim hover:bg-espresso-600 hover:text-cream;
@@ -115,30 +137,30 @@
     @apply btn bg-danger text-white hover:brightness-110;
   }
 
-  /* Small pill for facts (process, roast, ratio) */
+  /* Typographic micro-tag (uppercase, ruled) instead of a soft pill */
   .tag {
-    @apply inline-flex items-center gap-1 rounded-lg border border-cream/10 bg-espresso-700 px-2 py-1
-      text-2xs font-medium text-cream-dim;
+    @apply inline-flex items-center gap-1 rounded border border-cream/10 px-1.5 py-0.5
+      text-2xs font-medium uppercase tracking-wide text-cream-dim;
   }
 
-  /* Gold tasting-score chip */
+  /* Data figure */
   .score {
-    @apply inline-flex items-center gap-1 rounded-lg bg-gold/20 px-2 py-1 text-sm font-bold text-gold tnum;
+    @apply inline-flex items-center gap-1 text-sm font-semibold text-gold tnum;
   }
 
   /* Range slider */
   .slider {
-    @apply h-2 w-full cursor-pointer appearance-none rounded-full;
+    @apply h-1.5 w-full cursor-pointer appearance-none rounded-full;
     background: theme("colors.espresso.600");
   }
   .slider::-webkit-slider-thumb {
     @apply h-6 w-6 appearance-none rounded-full bg-gold;
-    border: 3px solid #ffffff;
-    box-shadow: 0 0 0 1px rgba(71, 99, 47, 0.5), 0 1px 3px rgba(35, 36, 29, 0.25);
+    border: 3px solid #fbfaf6;
+    box-shadow: 0 0 0 1px rgba(71, 99, 47, 0.5), 0 1px 3px rgba(33, 31, 24, 0.25);
   }
   .slider::-moz-range-thumb {
     @apply h-6 w-6 rounded-full border-0 bg-gold;
-    box-shadow: 0 0 0 3px #ffffff, 0 1px 3px rgba(35, 36, 29, 0.25);
+    box-shadow: 0 0 0 3px #fbfaf6, 0 1px 3px rgba(33, 31, 24, 0.25);
   }
 }
 
@@ -151,7 +173,6 @@
   }
 }
 
-/* Motion is state, never decoration — and never required to see content */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

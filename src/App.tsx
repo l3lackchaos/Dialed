@@ -44,14 +44,12 @@ function TabLayout() {
     <div className="mx-auto flex min-h-[100dvh] w-full max-w-lg flex-col">
       <header className="safe-top sticky top-0 z-sticky border-b border-cream/10 bg-espresso/90 backdrop-blur-md">
         <div className="flex items-center gap-3 px-4 py-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gold text-espresso-900 shadow-gold">
+          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-gold text-espresso-900">
             <Coffee className="h-5 w-5" strokeWidth={2.4} />
           </div>
-          <div className="leading-tight">
-            <p className="font-display text-lg font-semibold tracking-tight text-cream">
-              Dialed
-            </p>
-            <p className="text-2xs text-cream-mute">{t("app.tagline")}</p>
+          <div className="leading-none">
+            <p className="font-display text-xl font-semibold tracking-tight text-cream">Dialed</p>
+            <p className="kicker mt-1 text-[0.6rem]">{t("app.tagline")}</p>
           </div>
           <div className="ml-auto flex items-center gap-2">
             <LangToggle />

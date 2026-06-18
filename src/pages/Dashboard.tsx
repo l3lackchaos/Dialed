@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Coffee, Zap, ChevronRight, Timer } from "lucide-react";
-import { useT } from "../i18n";
+import { useT, useI18n } from "../i18n";
 import { useQuery } from "../hooks/useQuery";
 import { fetchBeans, fetchBrewLogs, fetchRecipes, fetchTastingByBean, type TastingRow } from "../lib/queries";
 import { TASTE_AXES } from "../lib/constants";
@@ -192,28 +192,35 @@ function computeBeanProfiles(beans: Bean[], tasting: TastingRow[]): BeanProfile[
 
 function Hero({ beanCount, brewCount }: { beanCount: number; brewCount: number }) {
   const t = useT();
+  const { lang } = useI18n();
+  const dateline = new Date()
+    .toLocaleDateString(lang === "th" ? "th-TH" : "en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" })
+    .toUpperCase();
+
   return (
-    <div className="surface relative overflow-hidden p-5">
-      <h1 className="font-display text-3xl font-semibold text-cream">{t("dash.greeting")}</h1>
-      <p className="mt-1 text-sm text-cream-dim">{t("dash.subtitle")}</p>
-      <div className="mt-4 flex items-baseline gap-4">
-        <span className="text-cream-dim"><b className="font-display text-2xl font-semibold text-gold tnum">{beanCount}</b> {t("dash.beansCount")}</span>
-        <span className="text-cream-mute">·</span>
-        <span className="text-cream-dim"><b className="font-display text-2xl font-semibold text-gold tnum">{brewCount}</b> {t("dash.brewsLogged")}</span>
+    <header className="mb-1">
+      <p className="kicker">{dateline}</p>
+      <h1 className="mast mt-2 text-[2.7rem]">{t("dash.greeting")}</h1>
+      <p className="mt-2 text-cream-dim">{t("dash.subtitle")}</p>
+      <div className="mt-4 flex items-center gap-3 border-t border-cream/15 pt-3 font-mono text-sm text-cream-dim tnum">
+        <span><b className="text-rust">{beanCount}</b> {t("dash.beansCount")}</span>
+        <span className="text-cream-mute">/</span>
+        <span><b className="text-rust">{brewCount}</b> {t("dash.brewsLogged")}</span>
       </div>
-    </div>
+    </header>
   );
 }
 
 function SectionTitle({ icon, title, to }: { icon?: React.ReactNode; title: string; to?: string }) {
   const t = useT();
   return (
-    <div className="mb-3 flex items-center justify-between">
-      <h2 className="flex items-center gap-2 text-lg font-semibold text-cream">
+    <div className="mb-3 flex items-center gap-3">
+      <h2 className="kicker flex items-center gap-1.5 text-cream-dim">
         {icon && <span className="text-gold">{icon}</span>}
         {title}
       </h2>
-      {to && <Link to={to} className="flex items-center gap-0.5 text-xs font-medium text-gold transition-colors hover:text-gold-dark">{t("common.viewAll")} <ChevronRight className="h-3.5 w-3.5" /></Link>}
+      <div className="h-px flex-1 bg-cream/15" />
+      {to && <Link to={to} className="kicker text-gold transition-colors hover:text-gold-dark">{t("common.viewAll")} →</Link>}
     </div>
   );
 }

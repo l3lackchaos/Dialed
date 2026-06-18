@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Coffee, Plus, Trash2, ChevronRight } from "lucide-react";
+import { Coffee, Plus, Trash2 } from "lucide-react";
 import { useT } from "../i18n";
 import { useQuery } from "../hooks/useQuery";
 import { fetchBeans, deleteBean } from "../lib/queries";
@@ -63,10 +63,11 @@ export default function Beans() {
         />
       ) : (
         <ul className="space-y-3">
-          {beans.map((bean) => (
+          {beans.map((bean, i) => (
             <li key={bean.id}>
               <BeanRow
                 bean={bean}
+                index={i}
                 onOpen={() => navigate(`/beans/${bean.id}/edit`)}
                 onDelete={() => setDeleting(bean)}
               />
@@ -98,65 +99,58 @@ function freshness(t: ReturnType<typeof useT>, roastDate: string | null): string
 
 function BeanRow({
   bean,
+  index,
   onOpen,
   onDelete,
 }: {
   bean: Bean;
+  index: number;
   onOpen: () => void;
   onDelete: () => void;
 }) {
   const t = useT();
-  const tint = bean.roast_level ? ROAST_TINT[bean.roast_level] : "#C8963A";
+  const tint = bean.roast_level ? ROAST_TINT[bean.roast_level] : "#47632F";
   const rest = freshness(t, bean.roast_date);
 
   return (
-    <div className="surface group flex items-stretch overflow-hidden transition-colors hover:border-gold/30">
-      <button onClick={onOpen} className="flex-1 px-4 py-3.5 text-left">
-        <div className="flex items-center gap-2.5">
-          <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: tint }} aria-hidden />
-          <h3 className="truncate font-semibold text-cream">{bean.name}</h3>
+    <article className="surface relative p-5 transition-colors hover:border-gold/40">
+      <button onClick={onDelete} className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center text-cream-mute transition-colors hover:text-danger" aria-label={t("common.delete")}>
+        <Trash2 className="h-4 w-4" />
+      </button>
+
+      <button onClick={onOpen} className="block w-full text-left">
+        <div className="flex items-baseline gap-2.5">
+          <span className="font-mono text-xs text-cream-mute tnum">{String(index + 1).padStart(2, "0")}</span>
+          <span className="h-2.5 w-2.5 shrink-0 translate-y-[-1px] rounded-full" style={{ background: tint }} aria-hidden />
+          <h3 className="mast min-w-0 flex-1 truncate pr-8 text-xl">{bean.name}</h3>
         </div>
-        {bean.roaster && <p className="mt-0.5 pl-5 text-sm text-cream-dim">{bean.roaster}</p>}
+
+        <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 pl-8 text-sm text-cream-dim">
+          {bean.origin && <span>{bean.origin}</span>}
+          {bean.origin && bean.roaster && <span className="text-cream-mute">·</span>}
+          {bean.roaster && <span>{bean.roaster}</span>}
+        </div>
 
         {(bean.process || bean.roast_level) && (
-          <div className="mt-2 flex flex-wrap gap-1.5 pl-5">
+          <div className="mt-2.5 flex flex-wrap gap-1.5 pl-8">
             {bean.process && <span className="tag">{bean.process}</span>}
             {bean.roast_level && (
-              <span className="tag" style={{ color: tint, borderColor: `${tint}55` }}>
-                {bean.roast_level}
-              </span>
+              <span className="tag" style={{ color: tint, borderColor: `${tint}66` }}>{bean.roast_level}</span>
             )}
           </div>
         )}
 
         {bean.tasting_notes && (
-          <p className="mt-2 pl-5 text-sm italic leading-relaxed text-cream-dim">
-            {bean.tasting_notes}
+          <p className="mt-3 border-t border-cream/15 pt-3 font-display text-[0.95rem] italic leading-relaxed text-cream-dim">
+            “{bean.tasting_notes}”
           </p>
         )}
 
-        <div className="mt-2 flex items-center gap-2 pl-5 text-2xs text-cream-mute">
+        <div className="mt-3 flex items-center gap-2 text-2xs uppercase tracking-wide text-cream-mute">
           <span>{t("beans.roasted", { date: formatDate(bean.roast_date) })}</span>
-          {rest && <span className="text-gold/80">· {rest}</span>}
+          {rest && <span className="text-gold">· {rest}</span>}
         </div>
       </button>
-
-      <div className="flex flex-col items-center justify-between border-l border-cream/8 py-2">
-        <button
-          onClick={onDelete}
-          className="flex h-9 w-11 items-center justify-center text-cream-mute transition-colors hover:text-danger"
-          aria-label={t("common.delete")}
-        >
-          <Trash2 className="h-4 w-4" />
-        </button>
-        <button
-          onClick={onOpen}
-          className="flex h-9 w-11 items-center justify-center text-cream-mute transition-colors hover:text-gold"
-          aria-label={t("common.edit")}
-        >
-          <ChevronRight className="h-5 w-5" />
-        </button>
-      </div>
-    </div>
+    </article>
   );
 }
