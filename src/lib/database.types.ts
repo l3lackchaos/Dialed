@@ -42,7 +42,8 @@ export type Database = {
         Row: {
           id: string;
           created_at: string;
-          bean_id: string;
+          bean_id: string | null;
+          bean_label: string | null;
           name: string;
           dripper: string | null;
           grinder: string | null;
@@ -59,7 +60,8 @@ export type Database = {
         Insert: {
           id?: string;
           created_at?: string;
-          bean_id: string;
+          bean_id?: string | null;
+          bean_label?: string | null;
           name: string;
           dripper?: string | null;
           grinder?: string | null;

@@ -13,9 +13,8 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        // Split the heavy charting lib and data layer into cacheable vendor chunks.
+        // Split the data layer and framework into cacheable vendor chunks.
         manualChunks: {
-          recharts: ["recharts"],
           supabase: ["@supabase/supabase-js"],
           react: ["react", "react-dom", "react-router-dom"],
         },

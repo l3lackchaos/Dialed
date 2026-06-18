@@ -6,20 +6,16 @@ import type {
 } from "react";
 import { Loader2, ChevronLeft } from "lucide-react";
 
-/* ----------------------------- Form fields ----------------------------- */
-
 export function Field({
   label,
   optionalText,
   hint,
-  error,
   children,
   className = "",
 }: {
   label: string;
   optionalText?: string;
   hint?: string;
-  error?: string;
   children: ReactNode;
   className?: string;
 }) {
@@ -27,13 +23,10 @@ export function Field({
     <label className={`block ${className}`}>
       <span className="label">
         {label}
-        {optionalText && (
-          <span className="ml-1.5 font-normal text-cream-mute">· {optionalText}</span>
-        )}
+        {optionalText && <span className="ml-1.5 font-normal text-cream-mute">· {optionalText}</span>}
       </span>
       {children}
-      {hint && !error && <span className="mt-1 block text-xs text-cream-mute">{hint}</span>}
-      {error && <span className="mt-1 block text-xs text-danger">{error}</span>}
+      {hint && <span className="mt-1 block text-xs text-cream-mute">{hint}</span>}
     </label>
   );
 }
@@ -73,8 +66,6 @@ export function Select({
   );
 }
 
-/* ----------------------------- Feedback ----------------------------- */
-
 export function Spinner({ className = "" }: { className?: string }) {
   return <Loader2 className={`animate-spin ${className}`} />;
 }
@@ -89,7 +80,7 @@ export function PageLoader({ label }: { label: string }) {
 }
 
 export function Skeleton({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-xl bg-espresso-700 ${className}`} />;
+  return <div className={`animate-pulse rounded-2xl bg-espresso-700 ${className}`} />;
 }
 
 export function EmptyState({
@@ -105,48 +96,17 @@ export function EmptyState({
 }) {
   return (
     <div className="flex flex-col items-center justify-center gap-3 px-6 py-16 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gold/12 text-gold">
+      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gold/12 text-gold">
         {icon}
       </div>
       <h3 className="text-lg font-semibold text-cream">{title}</h3>
-      <p className="max-w-xs text-pretty text-sm leading-relaxed text-cream-dim">
-        {description}
-      </p>
+      <p className="max-w-xs text-[0.95rem] leading-relaxed text-cream-dim">{description}</p>
       {action && <div className="mt-2">{action}</div>}
     </div>
   );
 }
 
-/* ----------------------------- Page chrome ----------------------------- */
-
-/** Editorial masthead row for the main tab pages — big serif title over a rule. */
-export function TabHeader({
-  title,
-  kicker,
-  action,
-}: {
-  title: string;
-  kicker?: string;
-  action?: ReactNode;
-}) {
-  return (
-    <header className="mb-6">
-      <div className="flex items-end justify-between gap-4">
-        <div>
-          {kicker && <p className="kicker mb-1.5">{kicker}</p>}
-          <h1 className="mast text-[2.1rem]">{title}</h1>
-        </div>
-        {action}
-      </div>
-      <div className="mt-3 h-px bg-cream/15" />
-    </header>
-  );
-}
-
-/**
- * Full-screen form shell — replaces cramped modals. Sticky header with a back
- * affordance and a sticky action bar so Save is always reachable one-thumbed.
- */
+/** Full-screen form shell with a back header and a sticky save bar. */
 export function FormScreen({
   title,
   onClose,
@@ -162,23 +122,18 @@ export function FormScreen({
 }) {
   return (
     <div className="flex min-h-[100dvh] flex-col bg-espresso">
-      <header className="safe-top sticky top-0 z-sticky border-b border-cream/10 bg-espresso/95 backdrop-blur-sm">
+      <header className="safe-top sticky top-0 z-40 border-b border-cream/10 bg-espresso/95 backdrop-blur-sm">
         <div className="mx-auto flex w-full max-w-lg items-center gap-2 px-3 py-3">
-          <button
-            onClick={onClose}
-            className="-ml-1 flex h-10 items-center gap-1 rounded-lg pl-1 pr-2 text-cream-dim transition-colors hover:text-cream"
-          >
+          <button onClick={onClose} className="-ml-1 flex h-10 items-center gap-1 rounded-lg pl-1 pr-2 text-cream-dim transition-colors hover:text-cream">
             <ChevronLeft className="h-5 w-5" />
             <span className="text-sm font-medium">{closeLabel}</span>
           </button>
-          <h2 className="mast flex-1 truncate text-center text-lg">{title}</h2>
+          <h2 className="flex-1 truncate text-center text-base font-semibold text-cream">{title}</h2>
           <div className="h-10 w-16" aria-hidden />
         </div>
       </header>
-
       <div className="mx-auto w-full max-w-lg flex-1 px-4 py-5">{children}</div>
-
-      <footer className="safe-bottom sticky bottom-0 z-sticky border-t border-cream/10 bg-espresso/95 backdrop-blur-sm">
+      <footer className="safe-bottom sticky bottom-0 z-40 border-t border-cream/10 bg-espresso/95 backdrop-blur-sm">
         <div className="mx-auto flex w-full max-w-lg gap-3 px-4 py-3">{footer}</div>
       </footer>
     </div>

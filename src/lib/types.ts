@@ -21,8 +21,5 @@ export type PourStep = {
   note: string;
 };
 
-// Convenience shapes for joined queries.
-export type RecipeWithBean = Recipe & { bean: Bean | null };
-export type BrewLogWithRecipe = BrewLog & {
-  recipe: (Recipe & { bean: Bean | null }) | null;
-};
+// A tasting session joined with its recipe.
+export type BrewLogWithRecipe = BrewLog & { recipe: Recipe | null };

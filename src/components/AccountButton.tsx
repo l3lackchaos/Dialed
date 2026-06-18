@@ -78,8 +78,8 @@ function ProfileModal({ open, onClose }: { open: boolean; onClose: () => void })
       }
     >
       <div className="space-y-4">
-        <Field label={t("comments.fieldName")}>
-          <TextInput value={name} onChange={(e) => setName(e.target.value)} placeholder={t("comments.phName")} autoFocus />
+        <Field label={t("tasting.yourName")}>
+          <TextInput value={name} onChange={(e) => setName(e.target.value)} placeholder={t("tasting.phName")} autoFocus />
         </Field>
         <div>
           <span className="label">{t("profile.emoji")}</span>

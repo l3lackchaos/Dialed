@@ -1,56 +1,39 @@
 import { NavLink, Outlet, Route, Routes } from "react-router-dom";
-import { Home, Coffee, BookOpen, ClipboardList } from "lucide-react";
+import { BookOpen, Coffee } from "lucide-react";
 import { useT } from "./i18n";
 import AccountButton from "./components/AccountButton";
 import LangToggle from "./components/LangToggle";
 
-import Dashboard from "./pages/Dashboard";
-import Beans from "./pages/Beans";
 import Recipes from "./pages/Recipes";
-import Brews from "./pages/Brews";
-import Session from "./pages/Session";
-import BeanEdit from "./pages/BeanEdit";
+import Tastings from "./pages/Tastings";
 import RecipeEdit from "./pages/RecipeEdit";
-import LogEdit from "./pages/LogEdit";
+import RecipeDetail from "./pages/RecipeDetail";
+import Session from "./pages/Session";
 
 export default function App() {
   return (
     <Routes>
-      {/* Main tabbed app shell */}
       <Route element={<TabLayout />}>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/beans" element={<Beans />} />
-        <Route path="/recipes" element={<Recipes />} />
-        <Route path="/logs" element={<Brews />} />
+        <Route path="/" element={<Recipes />} />
+        <Route path="/tastings" element={<Tastings />} />
       </Route>
-
-      {/* Full-screen form routes (no tab chrome) */}
-      <Route path="/beans/new" element={<BeanEdit />} />
-      <Route path="/beans/:id/edit" element={<BeanEdit />} />
-      <Route path="/recipes/new" element={<RecipeEdit />} />
-      <Route path="/recipes/:id/edit" element={<RecipeEdit />} />
-      <Route path="/logs/new" element={<LogEdit />} />
-      <Route path="/logs/:id/edit" element={<LogEdit />} />
-
-      {/* Public shared session */}
-      <Route path="/s/:logId" element={<Session />} />
+      <Route path="/r/new" element={<RecipeEdit />} />
+      <Route path="/r/:id" element={<RecipeDetail />} />
+      <Route path="/r/:id/edit" element={<RecipeEdit />} />
+      <Route path="/s/:id" element={<Session />} />
     </Routes>
   );
 }
 
 function TabLayout() {
-  const t = useT();
   return (
     <div className="mx-auto flex min-h-[100dvh] w-full max-w-lg flex-col">
-      <header className="safe-top sticky top-0 z-sticky border-b border-cream/10 bg-espresso/90 backdrop-blur-md">
+      <header className="safe-top sticky top-0 z-40 border-b border-cream/10 bg-espresso/90 backdrop-blur-md">
         <div className="flex items-center gap-3 px-4 py-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-gold text-espresso-900">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gold text-espresso-900">
             <Coffee className="h-5 w-5" strokeWidth={2.4} />
           </div>
-          <div className="leading-none">
-            <p className="font-display text-xl font-semibold tracking-tight text-cream">Dialed</p>
-            <p className="kicker mt-1 text-[0.6rem]">{t("app.tagline")}</p>
-          </div>
+          <p className="font-display text-xl font-semibold text-cream">Dialed</p>
           <div className="ml-auto flex items-center gap-2">
             <LangToggle />
             <AccountButton />
@@ -70,37 +53,18 @@ function TabLayout() {
 function BottomNav() {
   const t = useT();
   const items = [
-    { to: "/", label: t("nav.home"), icon: Home, end: true },
-    { to: "/beans", label: t("nav.beans"), icon: Coffee, end: false },
-    { to: "/recipes", label: t("nav.recipes"), icon: BookOpen, end: false },
-    { to: "/logs", label: t("nav.brews"), icon: ClipboardList, end: false },
+    { to: "/", label: t("nav.recipes"), icon: BookOpen, end: true },
+    { to: "/tastings", label: t("nav.tastings"), icon: Coffee, end: false },
   ];
   return (
-    <nav className="safe-bottom fixed inset-x-0 bottom-0 z-nav border-t border-cream/10 bg-espresso-900/95 backdrop-blur-lg">
-      <div className="mx-auto grid max-w-lg grid-cols-4">
+    <nav className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-cream/10 bg-espresso-900/95 backdrop-blur-lg">
+      <div className="mx-auto grid max-w-lg grid-cols-2">
         {items.map(({ to, label, icon: Icon, end }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={end}
-            className="relative flex flex-col items-center gap-1 pb-2 pt-2.5"
-          >
+          <NavLink key={to} to={to} end={end} className="flex flex-col items-center gap-1 py-2.5">
             {({ isActive }) => (
               <>
-                {isActive && (
-                  <span className="absolute inset-x-6 top-0 h-0.5 bg-gold" aria-hidden />
-                )}
-                <Icon
-                  className={`h-5 w-5 transition-colors ${isActive ? "text-gold" : "text-cream-mute"}`}
-                  strokeWidth={isActive ? 2.4 : 2}
-                />
-                <span
-                  className={`text-[0.6rem] font-semibold uppercase tracking-wider transition-colors ${
-                    isActive ? "text-gold" : "text-cream-mute"
-                  }`}
-                >
-                  {label}
-                </span>
+                <Icon className={`h-6 w-6 transition-colors ${isActive ? "text-gold" : "text-cream-mute"}`} strokeWidth={isActive ? 2.4 : 2} />
+                <span className={`text-xs font-medium ${isActive ? "text-gold" : "text-cream-mute"}`}>{label}</span>
               </>
             )}
           </NavLink>

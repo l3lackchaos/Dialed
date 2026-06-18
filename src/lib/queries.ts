@@ -1,15 +1,11 @@
 import { supabase } from "./supabase";
 import type {
-  Bean,
-  BeanInsert,
   BrewComment,
   BrewCommentInsert,
   BrewLog,
-  BrewLogInsert,
   BrewLogWithRecipe,
   Recipe,
   RecipeInsert,
-  RecipeWithBean,
 } from "./types";
 
 function unwrap<T>(res: { data: T | null; error: { message: string } | null }): T {
@@ -17,52 +13,12 @@ function unwrap<T>(res: { data: T | null; error: { message: string } | null }): 
   return res.data as T;
 }
 
-/* ----------------------------- Beans ----------------------------- */
+/* ----------------------------- Recipes ----------------------------- */
 
-export async function fetchBeans(): Promise<Bean[]> {
+export async function fetchRecipes(): Promise<Recipe[]> {
   return unwrap(
-    await supabase.from("beans").select("*").order("created_at", { ascending: false }),
+    await supabase.from("recipes").select("*").order("created_at", { ascending: false }),
   );
-}
-
-export async function fetchBean(id: string): Promise<Bean> {
-  return unwrap(await supabase.from("beans").select("*").eq("id", id).single());
-}
-
-export async function createBean(payload: BeanInsert): Promise<Bean> {
-  return unwrap(await supabase.from("beans").insert(payload).select().single());
-}
-
-export async function updateBean(id: string, payload: Partial<BeanInsert>): Promise<Bean> {
-  return unwrap(
-    await supabase.from("beans").update(payload).eq("id", id).select().single(),
-  );
-}
-
-export async function deleteBean(id: string): Promise<void> {
-  const { error } = await supabase.from("beans").delete().eq("id", id);
-  if (error) throw new Error(error.message);
-}
-
-/* ---------------------------- Recipes ---------------------------- */
-
-export async function fetchRecipes(): Promise<RecipeWithBean[]> {
-  return unwrap(
-    await supabase
-      .from("recipes")
-      .select("*, bean:beans(*)")
-      .order("created_at", { ascending: false }),
-  ) as RecipeWithBean[];
-}
-
-export async function fetchFavoriteRecipes(): Promise<RecipeWithBean[]> {
-  return unwrap(
-    await supabase
-      .from("recipes")
-      .select("*, bean:beans(*)")
-      .eq("is_favorite", true)
-      .order("created_at", { ascending: false }),
-  ) as RecipeWithBean[];
 }
 
 export async function fetchRecipe(id: string): Promise<Recipe> {
@@ -73,24 +29,8 @@ export async function createRecipe(payload: RecipeInsert): Promise<Recipe> {
   return unwrap(await supabase.from("recipes").insert(payload).select().single());
 }
 
-export async function updateRecipe(
-  id: string,
-  payload: Partial<RecipeInsert>,
-): Promise<Recipe> {
-  return unwrap(
-    await supabase.from("recipes").update(payload).eq("id", id).select().single(),
-  );
-}
-
-export async function toggleRecipeFavorite(
-  id: string,
-  isFavorite: boolean,
-): Promise<void> {
-  const { error } = await supabase
-    .from("recipes")
-    .update({ is_favorite: isFavorite })
-    .eq("id", id);
-  if (error) throw new Error(error.message);
+export async function updateRecipe(id: string, payload: Partial<RecipeInsert>): Promise<Recipe> {
+  return unwrap(await supabase.from("recipes").update(payload).eq("id", id).select().single());
 }
 
 export async function deleteRecipe(id: string): Promise<void> {
@@ -98,101 +38,77 @@ export async function deleteRecipe(id: string): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
-/* --------------------------- Brew logs --------------------------- */
+/* ----------------------- Tasting sessions (brew_logs) ----------------------- */
 
-export async function fetchBrewLogs(): Promise<BrewLogWithRecipe[]> {
+export type SessionSummary = BrewLog & { tasting_count: number; avg_overall: number | null };
+
+export async function createSession(recipeId: string): Promise<BrewLog> {
   return unwrap(
-    await supabase
-      .from("brew_logs")
-      .select("*, recipe:recipes(*, bean:beans(*))")
-      .order("brew_date", { ascending: false })
-      .order("created_at", { ascending: false }),
-  ) as BrewLogWithRecipe[];
-}
-
-export async function fetchBrewLog(id: string): Promise<BrewLogWithRecipe> {
-  return unwrap(
-    await supabase
-      .from("brew_logs")
-      .select("*, recipe:recipes(*, bean:beans(*))")
-      .eq("id", id)
-      .single(),
-  ) as BrewLogWithRecipe;
-}
-
-export async function createBrewLog(payload: BrewLogInsert): Promise<BrewLog> {
-  return unwrap(await supabase.from("brew_logs").insert(payload).select().single());
-}
-
-export async function updateBrewLog(
-  id: string,
-  payload: Partial<BrewLogInsert>,
-): Promise<BrewLog> {
-  return unwrap(
-    await supabase.from("brew_logs").update(payload).eq("id", id).select().single(),
+    await supabase.from("brew_logs").insert({ recipe_id: recipeId }).select().single(),
   );
 }
 
-export async function deleteBrewLog(id: string): Promise<void> {
+export async function fetchSession(id: string): Promise<BrewLogWithRecipe> {
+  return unwrap(
+    await supabase.from("brew_logs").select("*, recipe:recipes(*)").eq("id", id).single(),
+  ) as BrewLogWithRecipe;
+}
+
+export async function deleteSession(id: string): Promise<void> {
   const { error } = await supabase.from("brew_logs").delete().eq("id", id);
   if (error) throw new Error(error.message);
 }
 
-/* ------------------------- Brew comments ------------------------- */
+/** Sessions for one recipe, each with how many people tasted + the average score. */
+export async function fetchSessionsForRecipe(recipeId: string): Promise<SessionSummary[]> {
+  const logs = unwrap(
+    await supabase
+      .from("brew_logs")
+      .select("*, brew_comments(overall)")
+      .eq("recipe_id", recipeId)
+      .order("brew_date", { ascending: false })
+      .order("created_at", { ascending: false }),
+  ) as Array<BrewLog & { brew_comments: { overall: number | null }[] }>;
+  return logs.map(summarize);
+}
 
-export async function fetchBrewComments(brewLogId: string): Promise<BrewComment[]> {
+/** All sessions across recipes, newest first (the Tastings tab). */
+export async function fetchRecentSessions(): Promise<(SessionSummary & { recipe: Recipe | null })[]> {
+  const logs = unwrap(
+    await supabase
+      .from("brew_logs")
+      .select("*, recipe:recipes(*), brew_comments(overall)")
+      .order("brew_date", { ascending: false })
+      .order("created_at", { ascending: false }),
+  ) as Array<BrewLog & { recipe: Recipe | null; brew_comments: { overall: number | null }[] }>;
+  return logs.map((l) => ({ ...summarize(l), recipe: l.recipe }));
+}
+
+function summarize<T extends BrewLog & { brew_comments: { overall: number | null }[] }>(
+  l: T,
+): SessionSummary {
+  const scores = (l.brew_comments ?? []).map((c) => c.overall).filter((n): n is number => n != null);
+  const avg = scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : null;
+  return { ...l, tasting_count: (l.brew_comments ?? []).length, avg_overall: avg };
+}
+
+/* ----------------------- Tastings (brew_comments) ----------------------- */
+
+export async function fetchTastings(sessionId: string): Promise<BrewComment[]> {
   return unwrap(
     await supabase
       .from("brew_comments")
       .select("*")
-      .eq("brew_log_id", brewLogId)
+      .eq("brew_log_id", sessionId)
       .order("created_at", { ascending: true }),
   );
 }
 
-export async function createBrewComment(
-  payload: BrewCommentInsert,
-): Promise<BrewComment> {
-  return unwrap(
-    await supabase.from("brew_comments").insert(payload).select().single(),
-  );
+export async function createTasting(payload: BrewCommentInsert): Promise<BrewComment> {
+  return unwrap(await supabase.from("brew_comments").insert(payload).select().single());
 }
 
-export async function deleteBrewComment(id: string): Promise<void> {
+export async function deleteTasting(id: string): Promise<void> {
   const { error } = await supabase.from("brew_comments").delete().eq("id", id);
   if (error) throw new Error(error.message);
-}
-
-/** Every tasting comment tagged with the bean it belongs to — powers the dashboard radar. */
-export type TastingRow = {
-  bean_id: string | null;
-  acidity: number | null;
-  body: number | null;
-  sweetness: number | null;
-  bitterness: number | null;
-  clarity: number | null;
-  overall: number | null;
-};
-
-export async function fetchTastingByBean(): Promise<TastingRow[]> {
-  const rows = unwrap(
-    await supabase
-      .from("brew_comments")
-      .select(
-        "acidity, body, sweetness, bitterness, clarity, overall, brew_logs(recipes(bean_id))",
-      ),
-  ) as Array<Record<string, unknown>>;
-
-  return rows.map((r) => {
-    const log = r.brew_logs as { recipes?: { bean_id?: string } } | null;
-    return {
-      bean_id: log?.recipes?.bean_id ?? null,
-      acidity: r.acidity as number | null,
-      body: r.body as number | null,
-      sweetness: r.sweetness as number | null,
-      bitterness: r.bitterness as number | null,
-      clarity: r.clarity as number | null,
-      overall: r.overall as number | null,
-    };
-  });
 }

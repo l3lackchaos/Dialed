@@ -15,152 +15,82 @@
 
   body {
     @apply bg-espresso text-cream font-sans antialiased;
-    /* Warm editorial paper, a faint olive wash at the masthead. Character lives
-       in the type and rules, not in a tinted bg. */
-    background-color: #f1efe7;
-    background-image: radial-gradient(
-      120% 60% at 50% -10%,
-      rgba(71, 99, 47, 0.05) 0%,
-      rgba(241, 239, 231, 0) 50%
-    );
-    background-attachment: fixed;
     -webkit-tap-highlight-color: transparent;
   }
 
   h1,
   h2,
   h3 {
-    @apply font-display;
+    @apply font-sans font-semibold;
     text-wrap: balance;
-    letter-spacing: -0.02em;
   }
 
-  /* Numbers read as lab/ledger data: monospace + tabular. Serif headings keep
-     their face (the font utility in the utilities layer wins over this). */
   .tnum {
-    @apply font-mono;
     font-variant-numeric: tabular-nums;
-    letter-spacing: -0.02em;
   }
 
   select option {
-    background-color: #fcfbf7;
-    color: #211f18;
+    background-color: #ffffff;
+    color: #2a2722;
   }
 
   :focus-visible {
-    outline: 2px solid rgba(71, 99, 47, 0.7);
+    outline: 2px solid rgba(79, 107, 54, 0.7);
     outline-offset: 2px;
-    border-radius: 2px;
-  }
-
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(71, 99, 47, 0.3) transparent;
-  }
-  *::-webkit-scrollbar {
-    width: 7px;
-    height: 7px;
-  }
-  *::-webkit-scrollbar-thumb {
-    background: rgba(71, 99, 47, 0.28);
-    border-radius: 999px;
+    border-radius: 4px;
   }
 }
 
 @layer components {
-  /* Editorial devices ------------------------------------------------ */
-
-  /* Masthead / page title */
-  .mast {
-    @apply font-display font-semibold text-cream;
-    letter-spacing: -0.03em;
-    line-height: 0.95;
-  }
-
-  /* Small-caps category label — the journal's voice, used deliberately */
-  .kicker {
-    @apply text-2xs font-semibold uppercase text-cream-mute;
-    letter-spacing: 0.16em;
-  }
-
-  /* Hairline rule */
-  .rule {
-    @apply border-cream/10;
-  }
-
-  /* A page "leaf" — paper on paper, defined by a hairline, not a heavy box */
+  /* A clean white card */
   .surface {
-    @apply rounded-xl border border-cream/10 bg-espresso-800 shadow-raise;
+    @apply rounded-2xl border border-cream/10 bg-espresso-800 shadow-card;
   }
 
-  /* Form controls */
   .label {
-    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wider text-cream-dim;
+    @apply mb-1.5 block text-sm font-medium text-cream-dim;
   }
 
   .field {
-    @apply w-full rounded-lg border border-cream/10 bg-espresso-800 px-3.5 text-[1rem] text-cream
-      placeholder:text-cream-mute/80 outline-none transition-colors duration-150
-      focus:border-gold/70;
-    min-height: 48px;
+    @apply w-full rounded-xl border border-cream/15 bg-espresso-800 px-4 text-[1rem] text-cream
+      placeholder:text-cream-mute outline-none transition-colors
+      focus:border-gold focus:ring-2 focus:ring-gold/20;
+    min-height: 52px;
   }
   textarea.field {
     @apply py-3 leading-relaxed;
-    min-height: 96px;
+    min-height: 104px;
     resize: vertical;
   }
   select.field {
     @apply appearance-none pr-10;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23888473' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%239A9486' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 0.75rem center;
+    background-position: right 0.85rem center;
   }
 
-  /* Buttons */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 text-[0.9rem] font-semibold
-      transition-all duration-150 ease-out-quart
-      active:scale-[0.98] disabled:pointer-events-none disabled:opacity-45;
-    min-height: 48px;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 text-[0.95rem] font-semibold
+      transition-all duration-150 active:scale-[0.98]
+      disabled:pointer-events-none disabled:opacity-45;
+    min-height: 52px;
   }
   .btn-primary {
     @apply btn bg-gold text-espresso-900 hover:bg-gold-light;
   }
   .btn-ghost {
-    @apply btn border border-cream/25 bg-transparent text-cream hover:border-gold hover:text-gold;
+    @apply btn border border-cream/20 bg-transparent text-cream hover:border-gold hover:text-gold;
   }
   .btn-quiet {
     @apply btn bg-espresso-700 text-cream-dim hover:bg-espresso-600 hover:text-cream;
   }
   .btn-danger {
-    @apply btn bg-danger text-white hover:brightness-110;
+    @apply btn bg-danger text-white hover:brightness-105;
   }
 
-  /* Typographic micro-tag (uppercase, ruled) instead of a soft pill */
-  .tag {
-    @apply inline-flex items-center gap-1 rounded border border-cream/10 px-1.5 py-0.5
-      text-2xs font-medium uppercase tracking-wide text-cream-dim;
-  }
-
-  /* Data figure */
-  .score {
-    @apply inline-flex items-center gap-1 text-sm font-semibold text-gold tnum;
-  }
-
-  /* Range slider */
-  .slider {
-    @apply h-1.5 w-full cursor-pointer appearance-none rounded-full;
-    background: theme("colors.espresso.600");
-  }
-  .slider::-webkit-slider-thumb {
-    @apply h-6 w-6 appearance-none rounded-full bg-gold;
-    border: 3px solid #fbfaf6;
-    box-shadow: 0 0 0 1px rgba(71, 99, 47, 0.5), 0 1px 3px rgba(33, 31, 24, 0.25);
-  }
-  .slider::-moz-range-thumb {
-    @apply h-6 w-6 rounded-full border-0 bg-gold;
-    box-shadow: 0 0 0 3px #fbfaf6, 0 1px 3px rgba(33, 31, 24, 0.25);
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full bg-espresso-700 px-2.5 py-1
+      text-xs font-medium text-cream-dim;
   }
 }
 
@@ -178,8 +108,6 @@
   *::before,
   *::after {
     animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
-    scroll-behavior: auto !important;
   }
 }
