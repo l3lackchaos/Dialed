@@ -76,6 +76,38 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["recipes"]["Insert"]>;
         Relationships: [];
       };
+      brew_comments: {
+        Row: {
+          id: string;
+          created_at: string;
+          brew_log_id: string;
+          author: string;
+          comment: string | null;
+          acidity: number | null;
+          body: number | null;
+          sweetness: number | null;
+          bitterness: number | null;
+          clarity: number | null;
+          overall: number | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          brew_log_id: string;
+          author: string;
+          comment?: string | null;
+          acidity?: number | null;
+          body?: number | null;
+          sweetness?: number | null;
+          bitterness?: number | null;
+          clarity?: number | null;
+          overall?: number | null;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["brew_comments"]["Insert"]
+        >;
+        Relationships: [];
+      };
       brew_logs: {
         Row: {
           id: string;

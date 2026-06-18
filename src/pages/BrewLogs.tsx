@@ -6,7 +6,10 @@ import {
   Trash2,
   Timer,
   ArrowRight,
+  MessageSquare,
+  ChevronDown,
 } from "lucide-react";
+import BrewComments from "../components/BrewComments";
 import { useQuery } from "../hooks/useQuery";
 import { fetchBrewLogs, fetchRecipes, deleteBrewLog } from "../lib/queries";
 import { formatDate } from "../lib/format";
@@ -154,6 +157,7 @@ function LogCard({
   onEdit: () => void;
   onDelete: () => void;
 }) {
+  const [showComments, setShowComments] = useState(false);
   return (
     <article className="card card-hover p-4">
       <div className="flex items-start justify-between gap-3">
@@ -234,6 +238,22 @@ function LogCard({
           </p>
         </div>
       )}
+
+      {/* Multi-taster comments — lazy-mounted on first open */}
+      <div className="mt-3 border-t border-gold/10 pt-3">
+        <button
+          onClick={() => setShowComments((s) => !s)}
+          className="flex w-full items-center justify-between text-sm font-medium text-gold/80 transition hover:text-gold"
+        >
+          <span className="flex items-center gap-2">
+            <MessageSquare className="h-4 w-4" /> Tasting comments
+          </span>
+          <ChevronDown
+            className={`h-4 w-4 transition-transform ${showComments ? "rotate-180" : ""}`}
+          />
+        </button>
+        {showComments && <BrewComments brewLogId={log.id} />}
+      </div>
     </article>
   );
 }

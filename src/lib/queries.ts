@@ -2,6 +2,8 @@ import { supabase } from "./supabase";
 import type {
   Bean,
   BeanInsert,
+  BrewComment,
+  BrewCommentInsert,
   BrewLog,
   BrewLogInsert,
   BrewLogWithRecipe,
@@ -115,5 +117,30 @@ export async function updateBrewLog(
 
 export async function deleteBrewLog(id: string): Promise<void> {
   const { error } = await supabase.from("brew_logs").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+/* ------------------------- Brew comments ------------------------- */
+
+export async function fetchBrewComments(brewLogId: string): Promise<BrewComment[]> {
+  return unwrap(
+    await supabase
+      .from("brew_comments")
+      .select("*")
+      .eq("brew_log_id", brewLogId)
+      .order("created_at", { ascending: true }),
+  );
+}
+
+export async function createBrewComment(
+  payload: BrewCommentInsert,
+): Promise<BrewComment> {
+  return unwrap(
+    await supabase.from("brew_comments").insert(payload).select().single(),
+  );
+}
+
+export async function deleteBrewComment(id: string): Promise<void> {
+  const { error } = await supabase.from("brew_comments").delete().eq("id", id);
   if (error) throw new Error(error.message);
 }

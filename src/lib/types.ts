@@ -9,6 +9,10 @@ export type RecipeInsert = Database["public"]["Tables"]["recipes"]["Insert"];
 export type BrewLog = Database["public"]["Tables"]["brew_logs"]["Row"];
 export type BrewLogInsert = Database["public"]["Tables"]["brew_logs"]["Insert"];
 
+export type BrewComment = Database["public"]["Tables"]["brew_comments"]["Row"];
+export type BrewCommentInsert =
+  Database["public"]["Tables"]["brew_comments"]["Insert"];
+
 // One row of a recipe's pour schedule table.
 export type PourStep = {
   pour: string; // label, e.g. "Bloom" or "2nd pour"
