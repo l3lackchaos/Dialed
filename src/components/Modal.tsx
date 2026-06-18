@@ -27,7 +27,7 @@ export default function Modal({ open, onClose, title, subtitle, children, footer
 
   return (
     <div className="fixed inset-0 z-sheet flex items-end justify-center sm:items-center">
-      <div className="animate-fade-in absolute inset-0 bg-espresso-900/80" onClick={onClose} aria-hidden />
+      <div className="animate-fade-in absolute inset-0 bg-cream/40" onClick={onClose} aria-hidden />
       <div
         role="dialog"
         aria-modal="true"

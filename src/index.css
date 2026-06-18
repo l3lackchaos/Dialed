@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   html,
@@ -15,13 +15,13 @@
 
   body {
     @apply bg-espresso text-cream font-sans antialiased;
-    /* A single soft pool of warm light up top — like a lamp over the brew bar.
-       No paper grain, no all-over glass; the surfaces stay solid and legible. */
-    background-color: #140c05;
+    /* Daylight: a faint olive wash high on a clean cool-paper base.
+       Warmth/character comes from the accent + serif, never a beige bg. */
+    background-color: #f2f1ec;
     background-image: radial-gradient(
-      110% 70% at 50% -15%,
-      rgba(200, 150, 58, 0.08) 0%,
-      rgba(20, 12, 5, 0) 55%
+      120% 70% at 50% -15%,
+      rgba(71, 99, 47, 0.06) 0%,
+      rgba(242, 241, 236, 0) 55%
     );
     background-attachment: fixed;
     -webkit-tap-highlight-color: transparent;
@@ -39,27 +39,27 @@
   }
 
   select option {
-    background-color: #1c130a;
-    color: #f4e9d4;
+    background-color: #ffffff;
+    color: #23241d;
   }
 
   /* Always-visible, keyboard-friendly focus */
   :focus-visible {
-    outline: 2px solid rgba(200, 150, 58, 0.7);
+    outline: 2px solid rgba(71, 99, 47, 0.7);
     outline-offset: 2px;
     border-radius: 4px;
   }
 
   * {
     scrollbar-width: thin;
-    scrollbar-color: rgba(200, 150, 58, 0.35) transparent;
+    scrollbar-color: rgba(71, 99, 47, 0.35) transparent;
   }
   *::-webkit-scrollbar {
     width: 7px;
     height: 7px;
   }
   *::-webkit-scrollbar-thumb {
-    background: rgba(200, 150, 58, 0.3);
+    background: rgba(71, 99, 47, 0.3);
     border-radius: 999px;
   }
 }
@@ -90,7 +90,7 @@
 
   select.field {
     @apply appearance-none pr-10;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23A99B7F' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23888577' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.75rem center;
   }
@@ -133,12 +133,12 @@
   }
   .slider::-webkit-slider-thumb {
     @apply h-6 w-6 appearance-none rounded-full bg-gold;
-    border: 3px solid #140c05;
-    box-shadow: 0 0 0 1px rgba(200, 150, 58, 0.6);
+    border: 3px solid #ffffff;
+    box-shadow: 0 0 0 1px rgba(71, 99, 47, 0.5), 0 1px 3px rgba(35, 36, 29, 0.25);
   }
   .slider::-moz-range-thumb {
     @apply h-6 w-6 rounded-full border-0 bg-gold;
-    box-shadow: 0 0 0 3px #140c05;
+    box-shadow: 0 0 0 3px #ffffff, 0 1px 3px rgba(35, 36, 29, 0.25);
   }
 }
 

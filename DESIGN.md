@@ -1,25 +1,28 @@
 # Design
 
 ## Theme
-Dark, warm, tactile. A dim café at night: deep espresso surfaces, a single brass-gold
-accent that behaves like reflected light on metal, cream ink. Identity is preserved
-from the original brief (committed brand colors below) — refined, not replaced.
+Light, bright, tactile. A Nordic-minimal specialty bar at 9am: clean cool-paper
+surfaces, near-black ink, and one deep **olive "origin" green** accent. Deliberately
+*not* the espresso-dark-and-gold coffee reflex, and *not* a beige/parchment near-white
+(the AI default) — warmth is carried by the accent and the Fraunces serif, never by a
+tinted body bg.
 
-Color strategy: **Restrained** (product floor) — tinted-neutral espresso surfaces +
-one gold accent reserved for primary actions, current selection, and state.
+Color strategy: **Restrained** (product floor) — cool-neutral paper surfaces + one
+olive accent reserved for primary actions, current selection, and state.
 
-## Color (OKLCH)
-Committed brand anchors kept from the original build:
-- `--espresso` body  `#140C05`  → oklch(0.18 0.018 60)
-- surface / raised   `#1C130A` / `#241809` (a second, warmer panel layer)
-- hairline borders   cream @ 8–14% — never a solid colored side-stripe
-- `--gold` accent    `#C8963A`  → oklch(0.72 0.11 75); hover `#E0B968`, press `#A2762A`
-- `--cream` ink      `#F0E4CC`  (primary text, ≥9:1 on espresso)
-- `--cream-dim` `#CDBEA1` for secondary text (≥4.5:1) — replaces the old too-faint mutes
-- semantic: success = gold, danger = `#E0654F`, focus ring = gold @ 55%
+> Token names in code are historical (`espresso` / `cream` / `gold`); they now map to
+> light surfaces / ink / olive accent so the palette swap stays centralized.
 
-Contrast was the #1 readability bug before: secondary text is now `cream-dim`
-(AA) instead of `cream-mute` for anything users must read.
+## Color
+- body `#F2F1EC` · cards `#FFFFFF` · fields/insets `#ECEBE4` (cool-neutral, near chroma 0)
+- ink `#23241D` (~14:1 on white) · secondary `#55564C` (AA ~7:1) · tertiary `#888577`
+- accent olive `#47632F` (~5.3:1 on white); hover `#5C7C43`, press `#37501F`
+- hairline borders: ink @ 10% — never a solid colored side-stripe
+- danger `#BC3B2C`; focus ring olive @ 70%
+- Multi-bean radar hues: olive, rust, teal, ochre, plum — all AA on white.
+
+Light mode chosen deliberately (scene: brewing by a sunlit window), not "to be safe".
+Was previously a dark espresso/gold theme; swapped wholesale on request.
 
 ## Typography
 Product rule: one workhorse family. **Inter** carries UI, labels, data, body at a

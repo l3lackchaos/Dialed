@@ -1,21 +1,20 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { MessageSquare } from "lucide-react";
 import { useT } from "../i18n";
 import { useQuery } from "../hooks/useQuery";
 import { fetchBrewLog, fetchRecipes, createBrewLog, updateBrewLog } from "../lib/queries";
 import { todayISO } from "../lib/format";
-import { TASTE_AXES, type TasteAxis } from "../lib/constants";
-import { FormScreen, Field, TextInput, TextArea, Select, PageLoader } from "../components/ui";
-import ScoreSlider from "../components/ScoreSlider";
-import TasteRadar from "../components/TasteRadar";
+import { GRINDERS } from "../lib/constants";
+import { FormScreen, Field, TextInput, Select, PageLoader } from "../components/ui";
 import { useToast } from "../components/Toast";
 import type { BrewLogInsert } from "../lib/types";
 
-type Scores = Record<TasteAxis, number>;
-const defaultScores: Scores = {
-  acidity: 3, body: 3, sweetness: 3, bitterness: 3, clarity: 3, overall: 3,
-};
-
+/**
+ * Logging a brew records how it was executed (recipe, finish time, grind clicks,
+ * grinder) — fast to fill mid-brew. Taste is captured afterwards, per person,
+ * in the Tasting comments thread.
+ */
 export default function LogEdit() {
   const t = useT();
   const { notify } = useToast();
@@ -31,29 +30,32 @@ export default function LogEdit() {
   const [recipeId, setRecipeId] = useState(presetRecipe);
   const [brewDate, setBrewDate] = useState(todayISO());
   const [actualTime, setActualTime] = useState("");
-  const [scores, setScores] = useState<Scores>({ ...defaultScores });
-  const [flavor, setFlavor] = useState("");
-  const [aroma, setAroma] = useState("");
-  const [next, setNext] = useState("");
+  const [click, setClick] = useState("");
+  const [grinder, setGrinder] = useState("");
   const [saving, setSaving] = useState(false);
+  const [touchedGear, setTouchedGear] = useState(false);
 
+  // Load an existing log for editing.
   useEffect(() => {
     const l = logQ.data;
     if (l) {
       setRecipeId(l.recipe_id);
       setBrewDate(l.brew_date);
       setActualTime(l.actual_time ?? "");
-      setScores({
-        acidity: l.acidity ?? 3, body: l.body ?? 3, sweetness: l.sweetness ?? 3,
-        bitterness: l.bitterness ?? 3, clarity: l.clarity ?? 3, overall: l.overall ?? 3,
-      });
-      setFlavor(l.flavor_notes ?? "");
-      setAroma(l.aroma_notes ?? "");
-      setNext(l.next_adjustment ?? "");
+      setClick(l.click_setting ?? "");
+      setGrinder(l.grinder ?? "");
+      setTouchedGear(true);
     }
   }, [logQ.data]);
 
   const selected = recipes.find((r) => r.id === recipeId);
+
+  // For a new log, pre-fill clicks/grinder from the chosen recipe (until edited).
+  useEffect(() => {
+    if (id || touchedGear || !selected) return;
+    setClick(selected.click_setting ?? "");
+    setGrinder(selected.grinder ?? "");
+  }, [selected, id, touchedGear]);
 
   function close() {
     navigate("/logs");
@@ -67,10 +69,8 @@ export default function LogEdit() {
         recipe_id: recipeId,
         brew_date: brewDate || todayISO(),
         actual_time: actualTime || null,
-        ...scores,
-        flavor_notes: flavor || null,
-        aroma_notes: aroma || null,
-        next_adjustment: next || null,
+        click_setting: click || null,
+        grinder: grinder || null,
       };
       if (id) {
         await updateBrewLog(id, payload);
@@ -107,7 +107,7 @@ export default function LogEdit() {
         </>
       }
     >
-      <div className="space-y-5">
+      <div className="space-y-4">
         <Field label={t("logs.fieldRecipe")}>
           <Select
             value={recipeId}
@@ -123,43 +123,35 @@ export default function LogEdit() {
           </Field>
           <Field
             label={t("logs.fieldActual")}
-            optionalText={t("common.optional")}
             hint={selected?.target_time ? t("logs.target", { time: selected.target_time }) : undefined}
           >
-            <TextInput
-              value={actualTime}
-              onChange={(e) => setActualTime(e.target.value)}
-              placeholder={t("logs.phActual")}
-              inputMode="numeric"
-            />
+            <TextInput value={actualTime} onChange={(e) => setActualTime(e.target.value)} placeholder={t("logs.phActual")} inputMode="numeric" />
           </Field>
         </div>
 
-        {/* Live radar + sliders */}
-        <div className="rounded-2xl bg-espresso-800 p-3">
-          <TasteRadar height={220} series={[{ name: "", color: "#C8963A", values: scores }]} />
-        </div>
-        <div className="space-y-4">
-          <p className="text-sm font-semibold text-cream-dim">{t("logs.scores")}</p>
-          {TASTE_AXES.map((axis) => (
-            <ScoreSlider
-              key={axis.key}
-              label={t(`taste.${axis.key}` as const)}
-              value={scores[axis.key]}
-              onChange={(v) => setScores((s) => ({ ...s, [axis.key]: v }))}
+        <div className="grid grid-cols-2 gap-3">
+          <Field label={t("logs.fieldClick")}>
+            <TextInput
+              value={click}
+              onChange={(e) => { setClick(e.target.value); setTouchedGear(true); }}
+              placeholder={t("recipes.phClick")}
             />
-          ))}
+          </Field>
+          <Field label={t("logs.fieldGrinder")}>
+            <Select
+              value={grinder}
+              onChange={(e) => { setGrinder(e.target.value); setTouchedGear(true); }}
+              options={GRINDERS}
+              placeholder={t("logs.selectGrinder")}
+            />
+          </Field>
         </div>
+        <p className="-mt-1 text-xs text-cream-mute">{t("logs.gearHint")}</p>
 
-        <Field label={t("logs.fieldFlavor")} optionalText={t("common.optional")}>
-          <TextArea value={flavor} onChange={(e) => setFlavor(e.target.value)} placeholder={t("logs.phFlavor")} />
-        </Field>
-        <Field label={t("logs.fieldAroma")} optionalText={t("common.optional")}>
-          <TextArea value={aroma} onChange={(e) => setAroma(e.target.value)} placeholder={t("logs.phAroma")} />
-        </Field>
-        <Field label={t("logs.fieldNext")} optionalText={t("common.optional")}>
-          <TextArea value={next} onChange={(e) => setNext(e.target.value)} placeholder={t("logs.phNext")} />
-        </Field>
+        <div className="flex items-start gap-2.5 rounded-xl border border-gold/25 bg-gold/8 px-3.5 py-3">
+          <MessageSquare className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
+          <p className="text-sm leading-relaxed text-cream-dim">{t("logs.tasteHint")}</p>
+        </div>
       </div>
     </FormScreen>
   );

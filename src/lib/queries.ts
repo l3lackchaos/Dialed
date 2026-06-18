@@ -162,3 +162,37 @@ export async function deleteBrewComment(id: string): Promise<void> {
   const { error } = await supabase.from("brew_comments").delete().eq("id", id);
   if (error) throw new Error(error.message);
 }
+
+/** Every tasting comment tagged with the bean it belongs to — powers the dashboard radar. */
+export type TastingRow = {
+  bean_id: string | null;
+  acidity: number | null;
+  body: number | null;
+  sweetness: number | null;
+  bitterness: number | null;
+  clarity: number | null;
+  overall: number | null;
+};
+
+export async function fetchTastingByBean(): Promise<TastingRow[]> {
+  const rows = unwrap(
+    await supabase
+      .from("brew_comments")
+      .select(
+        "acidity, body, sweetness, bitterness, clarity, overall, brew_logs(recipes(bean_id))",
+      ),
+  ) as Array<Record<string, unknown>>;
+
+  return rows.map((r) => {
+    const log = r.brew_logs as { recipes?: { bean_id?: string } } | null;
+    return {
+      bean_id: log?.recipes?.bean_id ?? null,
+      acidity: r.acidity as number | null,
+      body: r.body as number | null,
+      sweetness: r.sweetness as number | null,
+      bitterness: r.bitterness as number | null,
+      clarity: r.clarity as number | null,
+      overall: r.overall as number | null,
+    };
+  });
+}

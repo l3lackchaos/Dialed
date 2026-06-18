@@ -63,7 +63,7 @@ export default function BrewComments({ brewLogId }: { brewLogId: string }) {
           <p className="mb-1 flex items-center gap-1.5 px-1 text-2xs font-semibold uppercase tracking-wide text-gold/85">
             <Users className="h-3.5 w-3.5" /> {t("comments.groupAvg", { n: scored.length })}
           </p>
-          <TasteRadar height={210} series={[{ name: "", color: "#E6C173", values: groupAvg }]} />
+          <TasteRadar height={210} series={[{ name: "", color: "#47632F", values: groupAvg }]} />
         </div>
       )}
 
@@ -180,7 +180,7 @@ function CommentForm({
         </Field>
 
         <div className="rounded-2xl bg-espresso-700 p-2">
-          <TasteRadar height={200} series={[{ name: "", color: "#C8963A", values: scores }]} />
+          <TasteRadar height={200} series={[{ name: "", color: "#47632F", values: scores }]} />
         </div>
         <div className="space-y-3">
           <p className="text-sm font-semibold text-cream-dim">{t("comments.scores")}</p>

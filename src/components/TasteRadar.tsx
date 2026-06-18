@@ -40,15 +40,15 @@ export default function TasteRadar({
   return (
     <ResponsiveContainer width="100%" height={height}>
       <RadarChart data={data} outerRadius="72%">
-        <PolarGrid stroke="rgba(244,233,212,0.12)" />
+        <PolarGrid stroke="rgba(35,36,29,0.12)" />
         <PolarAngleAxis
           dataKey="axis"
-          tick={{ fill: "#D6C8AC", fontSize: 11, fontWeight: 500 }}
+          tick={{ fill: "#55564C", fontSize: 11, fontWeight: 500 }}
         />
         <PolarRadiusAxis
           domain={[0, 5]}
           tickCount={6}
-          tick={{ fill: "#A99B7F", fontSize: 9 }}
+          tick={{ fill: "#888577", fontSize: 9 }}
           axisLine={false}
         />
         {series.map((s, i) => (
@@ -59,7 +59,7 @@ export default function TasteRadar({
             stroke={s.color}
             strokeWidth={2}
             fill={s.color}
-            fillOpacity={series.length > 1 ? 0.12 : 0.3}
+            fillOpacity={series.length > 1 ? 0.1 : 0.18}
             dot={series.length === 1}
           />
         ))}

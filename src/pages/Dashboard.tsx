@@ -3,14 +3,15 @@ import { Link, useNavigate } from "react-router-dom";
 import { Coffee, Zap, ChevronRight, Timer } from "lucide-react";
 import { useT } from "../i18n";
 import { useQuery } from "../hooks/useQuery";
-import { fetchBeans, fetchBrewLogs, fetchRecipes } from "../lib/queries";
+import { fetchBeans, fetchBrewLogs, fetchRecipes, fetchTastingByBean, type TastingRow } from "../lib/queries";
 import { TASTE_AXES } from "../lib/constants";
 import { average, formatDate } from "../lib/format";
 import { PageLoader, EmptyState } from "../components/ui";
 import TasteRadar, { type RadarSeries } from "../components/TasteRadar";
-import type { Bean, BrewLogWithRecipe } from "../lib/types";
+import type { Bean } from "../lib/types";
 
-const SERIES_COLORS = ["#C8963A", "#E6C173", "#9C6B2E", "#D98C5F", "#7FA36B"];
+// Distinct, AA-on-white hues for comparing bean profiles.
+const SERIES_COLORS = ["#47632F", "#B0492A", "#2F6E86", "#A77B2E", "#7A4A6B"];
 
 export default function Dashboard() {
   const t = useT();
@@ -18,14 +19,16 @@ export default function Dashboard() {
   const beansQ = useQuery(fetchBeans);
   const logsQ = useQuery(fetchBrewLogs);
   const recipesQ = useQuery(fetchRecipes);
+  const tastingQ = useQuery(fetchTastingByBean);
 
   const beans = beansQ.data ?? [];
   const logs = logsQ.data ?? [];
   const recipes = recipesQ.data ?? [];
+  const tasting = tastingQ.data ?? [];
   const favorites = recipes.filter((r) => r.is_favorite);
 
   const [activeBeans, setActiveBeans] = useState<Set<string> | null>(null);
-  const beanProfiles = useMemo(() => computeBeanProfiles(beans, logs), [beans, logs]);
+  const beanProfiles = useMemo(() => computeBeanProfiles(beans, tasting), [beans, tasting]);
   const defaultActive = useMemo(
     () => new Set(beanProfiles.slice(0, 3).map((p) => p.bean.id)),
     [beanProfiles],
@@ -35,7 +38,7 @@ export default function Dashboard() {
     .filter((p) => selected.has(p.bean.id))
     .map((p, i) => ({ name: p.bean.name, color: SERIES_COLORS[i % SERIES_COLORS.length], values: p.profile }));
 
-  const loading = beansQ.loading || logsQ.loading || recipesQ.loading;
+  const loading = beansQ.loading || logsQ.loading || recipesQ.loading || tastingQ.loading;
   if (loading) return <PageLoader label={t("session.opening")} />;
 
   if (beans.length === 0 && recipes.length === 0 && logs.length === 0) {
@@ -66,10 +69,10 @@ export default function Dashboard() {
         ) : (
           <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
             {favorites.map((r) => (
-              <button key={r.id} onClick={() => navigate(`/logs/new?recipe=${r.id}`)} className="surface flex items-center justify-between gap-3 p-3.5 text-left transition-colors hover:border-gold/30">
+              <button key={r.id} onClick={() => navigate(`/logs/new?recipe=${r.id}`)} className="surface flex items-center justify-between gap-3 p-3.5 text-left transition-colors hover:border-gold/40">
                 <div className="min-w-0">
                   <p className="truncate font-semibold text-cream">{r.name}</p>
-                  <p className="truncate text-xs text-gold/85">{r.bean?.name ?? "—"} · {r.ratio ?? "—"}</p>
+                  <p className="truncate text-xs text-gold">{r.bean?.name ?? "—"} · {r.ratio ?? "—"}</p>
                 </div>
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gold text-espresso-900"><Zap className="h-4 w-4" strokeWidth={2.5} /></span>
               </button>
@@ -78,7 +81,7 @@ export default function Dashboard() {
         )}
       </section>
 
-      {/* Tasting profiles */}
+      {/* Tasting profiles (from everyone's comments) */}
       {beanProfiles.length > 0 && (
         <section>
           <SectionTitle title={t("dash.profiles")} />
@@ -98,7 +101,7 @@ export default function Dashboard() {
                     className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors ${on ? "border-transparent text-espresso-900" : "border-cream/15 text-cream-dim"}`}
                     style={on ? { background: color } : undefined}
                   >
-                    <span className="h-2 w-2 rounded-full" style={{ background: on ? "#140C05" : color }} />
+                    <span className="h-2 w-2 rounded-full" style={{ background: on ? "#FBFBF8" : color }} />
                     {p.bean.name}
                   </button>
                 );
@@ -121,7 +124,7 @@ export default function Dashboard() {
         ) : (
           <div className="flex gap-2.5 overflow-x-auto pb-1">
             {beans.map((b) => (
-              <Link key={b.id} to="/beans" className="surface w-44 shrink-0 p-3.5 transition-colors hover:border-gold/30">
+              <Link key={b.id} to="/beans" className="surface w-44 shrink-0 p-3.5 transition-colors hover:border-gold/40">
                 <p className="truncate font-semibold text-cream">{b.name}</p>
                 <p className="mt-0.5 truncate text-xs text-cream-dim">{b.origin ?? b.roaster ?? "—"}</p>
                 <div className="mt-2 flex flex-wrap gap-1">
@@ -143,14 +146,13 @@ export default function Dashboard() {
           <ul className="space-y-2.5">
             {logs.slice(0, 5).map((log) => (
               <li key={log.id}>
-                <Link to="/logs" className="surface flex items-center gap-3 p-3.5 transition-colors hover:border-gold/30">
-                  <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-xl bg-gold/12">
-                    <span className="text-base font-bold leading-none text-gold tnum">{log.overall ?? "–"}</span>
-                    <span className="text-[0.5rem] text-gold/70">/5</span>
+                <Link to="/logs" className="surface flex items-center gap-3 p-3.5 transition-colors hover:border-gold/40">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gold/12 text-gold">
+                    <Coffee className="h-5 w-5" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-semibold text-cream">{log.recipe?.name ?? "—"}</p>
-                    <p className="truncate text-xs text-gold/85">{log.recipe?.bean?.name ?? "—"}</p>
+                    <p className="truncate text-xs text-gold">{log.recipe?.bean?.name ?? "—"}</p>
                     <div className="mt-0.5 flex items-center gap-3 text-2xs text-cream-mute">
                       <span>{formatDate(log.brew_date)}</span>
                       {log.actual_time && <span className="flex items-center gap-1 tnum"><Timer className="h-3 w-3" /> {log.actual_time}</span>}
@@ -169,21 +171,20 @@ export default function Dashboard() {
 
 type BeanProfile = { bean: Bean; count: number; profile: Record<string, number | null> };
 
-function computeBeanProfiles(beans: Bean[], logs: BrewLogWithRecipe[]): BeanProfile[] {
-  const byBean = new Map<string, BrewLogWithRecipe[]>();
-  for (const log of logs) {
-    const beanId = log.recipe?.bean?.id;
-    if (!beanId) continue;
-    const arr = byBean.get(beanId) ?? [];
-    arr.push(log);
-    byBean.set(beanId, arr);
+function computeBeanProfiles(beans: Bean[], tasting: TastingRow[]): BeanProfile[] {
+  const byBean = new Map<string, TastingRow[]>();
+  for (const row of tasting) {
+    if (!row.bean_id) continue;
+    const arr = byBean.get(row.bean_id) ?? [];
+    arr.push(row);
+    byBean.set(row.bean_id, arr);
   }
   return beans
     .map((bean) => {
-      const beanLogs = byBean.get(bean.id) ?? [];
+      const rows = byBean.get(bean.id) ?? [];
       const profile: Record<string, number | null> = {};
-      for (const axis of TASTE_AXES) profile[axis.key] = average(beanLogs.map((l) => l[axis.key] as number | null));
-      return { bean, count: beanLogs.length, profile };
+      for (const axis of TASTE_AXES) profile[axis.key] = average(rows.map((r) => r[axis.key] as number | null));
+      return { bean, count: rows.length, profile };
     })
     .filter((p) => p.count > 0)
     .sort((a, b) => b.count - a.count);
@@ -212,7 +213,7 @@ function SectionTitle({ icon, title, to }: { icon?: React.ReactNode; title: stri
         {icon && <span className="text-gold">{icon}</span>}
         {title}
       </h2>
-      {to && <Link to={to} className="flex items-center gap-0.5 text-xs font-medium text-gold/85 transition-colors hover:text-gold">{t("common.viewAll")} <ChevronRight className="h-3.5 w-3.5" /></Link>}
+      {to && <Link to={to} className="flex items-center gap-0.5 text-xs font-medium text-gold transition-colors hover:text-gold-dark">{t("common.viewAll")} <ChevronRight className="h-3.5 w-3.5" /></Link>}
     </div>
   );
 }

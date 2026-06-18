@@ -47,8 +47,8 @@ export default function ShareSession({
     <Modal open={open} onClose={onClose} title={t("share.title")} subtitle={t("share.subtitle")}>
       <div className="space-y-5">
         <div className="flex flex-col items-center gap-3">
-          <div className="rounded-2xl bg-cream p-3 shadow-pop">
-            <QRCodeSVG value={url} size={168} fgColor="#140C05" bgColor="#F4E9D4" level="M" />
+          <div className="rounded-2xl border border-cream/10 bg-white p-3 shadow-pop">
+            <QRCodeSVG value={url} size={168} fgColor="#23241D" bgColor="#FFFFFF" level="M" />
           </div>
           <p className="text-xs text-cream-mute">{t("share.scan")}</p>
         </div>
