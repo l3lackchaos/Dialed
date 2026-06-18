@@ -1,4 +1,5 @@
 import { useEffect, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 type ModalProps = {
@@ -25,7 +26,10 @@ export default function Modal({ open, onClose, title, subtitle, children, footer
 
   if (!open) return null;
 
-  return (
+  // Portal to <body> so the dialog escapes any ancestor with backdrop-filter /
+  // transform / overflow (e.g. the sticky blurred header), which would otherwise
+  // become the containing block for `position: fixed` and break positioning.
+  return createPortal(
     <div className="fixed inset-0 z-sheet flex items-end justify-center sm:items-center">
       <div className="animate-fade-in absolute inset-0 bg-cream/40" onClick={onClose} aria-hidden />
       <div
@@ -56,6 +60,7 @@ export default function Modal({ open, onClose, title, subtitle, children, footer
           </footer>
         )}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
