@@ -3,6 +3,7 @@ import { BookOpen, Coffee } from "lucide-react";
 import { useT } from "./i18n";
 import AccountButton from "./components/AccountButton";
 import LangToggle from "./components/LangToggle";
+import ThemeToggle from "./components/ThemeToggle";
 
 import Recipes from "./pages/Recipes";
 import Tastings from "./pages/Tastings";
@@ -35,6 +36,7 @@ function TabLayout() {
           </div>
           <p className="font-display text-xl font-semibold text-cream">Dialed</p>
           <div className="ml-auto flex items-center gap-2">
+            <ThemeToggle />
             <LangToggle />
             <AccountButton />
           </div>
@@ -57,7 +59,7 @@ function BottomNav() {
     { to: "/tastings", label: t("nav.tastings"), icon: Coffee, end: false },
   ];
   return (
-    <nav className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-cream/10 bg-espresso-900/95 backdrop-blur-lg">
+    <nav className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-cream/10 bg-espresso-800/95 backdrop-blur-lg">
       <div className="mx-auto grid max-w-lg grid-cols-2">
         {items.map(({ to, label, icon: Icon, end }) => (
           <NavLink key={to} to={to} end={end} className="flex flex-col items-center gap-1 py-2.5">

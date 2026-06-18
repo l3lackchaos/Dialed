@@ -12,6 +12,7 @@ import Modal from "../components/Modal";
 import ShareSession from "../components/ShareSession";
 import { FLAVOR_AXES } from "../lib/constants";
 import LangToggle from "../components/LangToggle";
+import ThemeToggle from "../components/ThemeToggle";
 import { useProfile } from "../components/Profile";
 import { useToast } from "../components/Toast";
 import type { BrewComment } from "../lib/types";
@@ -63,7 +64,7 @@ export default function Session() {
             <ChevronLeft className="h-5 w-5" />
             <span className="text-sm font-medium">{recipe ? t("session.allRecipes") : t("session.goHome")}</span>
           </Link>
-          <div className="ml-auto"><LangToggle /></div>
+          <div className="ml-auto flex items-center gap-2"><ThemeToggle /><LangToggle /></div>
         </div>
       </header>
 

@@ -1,29 +1,34 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
+  darkMode: "class",
   theme: {
     extend: {
       colors: {
-        // Clean, calm light palette. One olive accent. Token names kept.
+        // Token names kept; values come from CSS vars so light/dark swap cleanly.
+        // Channels (R G B) let Tailwind's /opacity modifiers keep working.
         espresso: {
-          DEFAULT: "#F5F4EF", // page
-          900: "#FFFFFF", // text-on-accent / nav
-          800: "#FFFFFF", // cards
-          700: "#EFEEE8", // fields / insets / quiet
-          600: "#E3E1D9", // hover / track
-          500: "#CFCCC2",
+          DEFAULT: "rgb(var(--bg) / <alpha-value>)",
+          900: "rgb(var(--on-accent) / <alpha-value>)",
+          800: "rgb(var(--surface) / <alpha-value>)",
+          700: "rgb(var(--inset) / <alpha-value>)",
+          600: "rgb(var(--hover) / <alpha-value>)",
+          500: "rgb(var(--line-strong) / <alpha-value>)",
         },
         cream: {
-          DEFAULT: "#2A2722", // ink (~13:1 on white)
-          dim: "#6A665C", // secondary (AA ~5.6:1)
-          mute: "#9A9486", // tertiary
+          DEFAULT: "rgb(var(--ink) / <alpha-value>)",
+          dim: "rgb(var(--ink-dim) / <alpha-value>)",
+          mute: "rgb(var(--ink-mute) / <alpha-value>)",
         },
         gold: {
-          DEFAULT: "#4F6B36", // olive accent
-          light: "#5E7E42",
-          dark: "#3C5228",
+          DEFAULT: "rgb(var(--accent) / <alpha-value>)",
+          light: "rgb(var(--accent-light) / <alpha-value>)",
+          dark: "rgb(var(--accent-dark) / <alpha-value>)",
         },
-        danger: { DEFAULT: "#C24A3A", soft: "#F7E6E2" },
+        danger: {
+          DEFAULT: "rgb(var(--danger) / <alpha-value>)",
+          soft: "rgb(var(--danger-soft) / <alpha-value>)",
+        },
       },
       fontFamily: {
         display: ['"Fraunces"', "Georgia", "serif"],

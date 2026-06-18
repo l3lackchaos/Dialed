@@ -11,6 +11,7 @@ import { PageLoader, EmptyState } from "../components/ui";
 import StarRating from "../components/StarRating";
 import ConfirmDialog from "../components/ConfirmDialog";
 import LangToggle from "../components/LangToggle";
+import ThemeToggle from "../components/ThemeToggle";
 import { useToast } from "../components/Toast";
 
 export default function RecipeDetail() {
@@ -64,7 +65,7 @@ export default function RecipeDetail() {
             <ChevronLeft className="h-5 w-5" />
             <span className="text-sm font-medium">{t("session.allRecipes")}</span>
           </Link>
-          <div className="ml-auto"><LangToggle /></div>
+          <div className="ml-auto flex items-center gap-2"><ThemeToggle /><LangToggle /></div>
         </div>
       </header>
 

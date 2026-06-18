@@ -5,6 +5,38 @@
 @layer base {
   :root {
     color-scheme: light;
+    --bg: 245 244 239;
+    --surface: 255 255 255;
+    --inset: 239 238 232;
+    --hover: 227 225 217;
+    --line-strong: 207 204 194;
+    --on-accent: 255 255 255;
+    --ink: 42 39 34;
+    --ink-dim: 106 102 92;
+    --ink-mute: 154 148 134;
+    --accent: 79 107 54;
+    --accent-light: 94 126 66;
+    --accent-dark: 60 82 40;
+    --danger: 194 74 58;
+    --danger-soft: 247 230 226;
+  }
+
+  .dark {
+    color-scheme: dark;
+    --bg: 22 20 16; /* warm near-black */
+    --surface: 33 30 24;
+    --inset: 41 37 30;
+    --hover: 52 47 39;
+    --line-strong: 70 64 54;
+    --on-accent: 23 21 15; /* dark text on the light olive accent */
+    --ink: 240 236 226;
+    --ink-dim: 178 172 156;
+    --ink-mute: 130 124 110;
+    --accent: 138 173 101; /* lighter olive, reads on dark */
+    --accent-light: 156 189 122;
+    --accent-dark: 116 150 84;
+    --danger: 224 112 92;
+    --danger-soft: 58 28 22;
   }
 
   html,
@@ -30,8 +62,8 @@
   }
 
   select option {
-    background-color: #ffffff;
-    color: #2a2722;
+    background-color: rgb(var(--surface));
+    color: rgb(var(--ink));
   }
 
   :focus-visible {
