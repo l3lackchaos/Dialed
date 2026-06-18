@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ChevronLeft, Share2, Plus, Trash2, Coffee } from "lucide-react";
+import { ChevronLeft, Share2, Plus, Trash2, Coffee, ChevronDown } from "lucide-react";
 import { useT } from "../i18n";
 import { useQuery } from "../hooks/useQuery";
 import { fetchSession, fetchTastings, createTasting, deleteTasting } from "../lib/queries";
@@ -118,16 +118,7 @@ export default function Session() {
               ) : (
                 <ul className="space-y-2.5">
                   {tastings.map((c) => (
-                    <li key={c.id} className="surface p-4">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="font-semibold text-cream">{c.author}</span>
-                        <div className="flex items-center gap-2">
-                          {c.overall != null && <StarRating value={c.overall} size={16} />}
-                          <button onClick={() => remove(c.id)} className="text-cream-mute hover:text-danger" aria-label={t("common.delete")}><Trash2 className="h-4 w-4" /></button>
-                        </div>
-                      </div>
-                      {c.comment && <p className="mt-2 text-sm leading-relaxed text-cream-dim">{c.comment}</p>}
-                    </li>
+                    <TastingItem key={c.id} c={c} onDelete={() => remove(c.id)} />
                   ))}
                 </ul>
               )}
@@ -143,6 +134,50 @@ export default function Session() {
         </>
       )}
     </div>
+  );
+}
+
+function TastingItem({ c, onDelete }: { c: BrewComment; onDelete: () => void }) {
+  const t = useT();
+  const [open, setOpen] = useState(false);
+  const hasFlavor = FLAVOR_AXES.some((a) => c[a] != null);
+  const hasDetail = hasFlavor || !!c.comment;
+
+  return (
+    <li className="surface overflow-hidden">
+      <div className="flex items-center gap-2 p-4">
+        <button
+          onClick={() => hasDetail && setOpen((o) => !o)}
+          className="flex min-w-0 flex-1 items-center gap-2 text-left"
+          aria-expanded={hasDetail ? open : undefined}
+        >
+          <span className="min-w-0 flex-1 truncate font-semibold text-cream">{c.author}</span>
+          {c.overall != null && <StarRating value={c.overall} size={16} />}
+          {hasDetail && (
+            <ChevronDown className={`h-4 w-4 shrink-0 text-cream-mute transition-transform ${open ? "rotate-180" : ""}`} />
+          )}
+        </button>
+        <button onClick={onDelete} className="shrink-0 text-cream-mute transition-colors hover:text-danger" aria-label={t("common.delete")}>
+          <Trash2 className="h-4 w-4" />
+        </button>
+      </div>
+
+      {open && (
+        <div className="space-y-3 border-t border-cream/10 px-4 py-3">
+          {hasFlavor && (
+            <div className="space-y-2">
+              {FLAVOR_AXES.map((axis) => (
+                <div key={axis} className="flex items-center justify-between gap-3">
+                  <span className="text-sm text-cream-dim">{t(`taste.${axis}` as const)}</span>
+                  <StarRating value={(c[axis] as number | null) ?? 0} size={14} />
+                </div>
+              ))}
+            </div>
+          )}
+          {c.comment && <p className="text-sm leading-relaxed text-cream-dim">{c.comment}</p>}
+        </div>
+      )}
+    </li>
   );
 }
 
