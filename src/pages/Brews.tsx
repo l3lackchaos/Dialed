@@ -73,8 +73,8 @@ export default function Brews() {
         />
       ) : (
         <ul className="space-y-3">
-          {logs.map((log) => (
-            <li key={log.id}>
+          {logs.map((log, i) => (
+            <li key={log.id} className="animate-fade-up" style={{ animationDelay: `${Math.min(i, 8) * 45}ms` }}>
               <LogCard log={log} onEdit={() => navigate(`/logs/${log.id}/edit`)} onDelete={() => setDeleting(log)} />
             </li>
           ))}

@@ -64,7 +64,7 @@ export default function Beans() {
       ) : (
         <ul className="space-y-3">
           {beans.map((bean, i) => (
-            <li key={bean.id}>
+            <li key={bean.id} className="animate-fade-up" style={{ animationDelay: `${Math.min(i, 8) * 45}ms` }}>
               <BeanRow
                 bean={bean}
                 index={i}

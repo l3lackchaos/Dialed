@@ -78,8 +78,8 @@ export default function Recipes() {
         />
       ) : (
         <ul className="space-y-3">
-          {recipes.map((r) => (
-            <li key={r.id}>
+          {recipes.map((r, i) => (
+            <li key={r.id} className="animate-fade-up" style={{ animationDelay: `${Math.min(i, 8) * 45}ms` }}>
               <RecipeRow
                 recipe={r}
                 onEdit={() => navigate(`/recipes/${r.id}/edit`)}

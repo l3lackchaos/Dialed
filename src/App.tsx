@@ -83,18 +83,24 @@ function BottomNav() {
             key={to}
             to={to}
             end={end}
-            className="flex flex-col items-center gap-1 py-2 text-2xs font-medium"
+            className="relative flex flex-col items-center gap-1 pb-2 pt-2.5"
           >
             {({ isActive }) => (
               <>
+                {isActive && (
+                  <span className="absolute inset-x-6 top-0 h-0.5 bg-gold" aria-hidden />
+                )}
+                <Icon
+                  className={`h-5 w-5 transition-colors ${isActive ? "text-gold" : "text-cream-mute"}`}
+                  strokeWidth={isActive ? 2.4 : 2}
+                />
                 <span
-                  className={`flex h-9 w-12 items-center justify-center rounded-lg transition-colors duration-150 ${
-                    isActive ? "bg-gold/15 text-gold" : "text-cream-mute"
+                  className={`text-[0.6rem] font-semibold uppercase tracking-wider transition-colors ${
+                    isActive ? "text-gold" : "text-cream-mute"
                   }`}
                 >
-                  <Icon className="h-5 w-5" strokeWidth={isActive ? 2.4 : 2} />
+                  {label}
                 </span>
-                <span className={isActive ? "text-gold" : "text-cream-mute"}>{label}</span>
               </>
             )}
           </NavLink>
