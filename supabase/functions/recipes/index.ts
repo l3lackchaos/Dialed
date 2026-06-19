@@ -124,7 +124,7 @@ async function recipeDetail(id: string) {
   const recipes = await db(`recipes?id=eq.${id}&select=*`);
   if (!recipes.length) throw new Error("Recipe not found");
   const sessions = await db(
-    `brew_logs?recipe_id=eq.${id}&select=id,brew_date,brew_comments(overall,acidity,body,sweetness,bitterness,clarity)&order=brew_date.desc`,
+    `brew_logs?recipe_id=eq.${id}&select=id,brew_date,actual_time,brewer_note,brew_comments(overall,acidity,body,sweetness,bitterness,clarity)&order=brew_date.desc`,
   );
   // deno-lint-ignore no-explicit-any
   const rounds = sessions.map((s: any) => {
@@ -132,6 +132,8 @@ async function recipeDetail(id: string) {
     return {
       id: s.id,
       date: s.brew_date,
+      finish_time: s.actual_time ?? null,
+      brewer_note: s.brewer_note ?? null,
       tasters: cs.length,
       // deno-lint-ignore no-explicit-any
       avg_overall: avg(cs.map((c: any) => c.overall)),

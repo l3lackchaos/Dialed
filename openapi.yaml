@@ -192,6 +192,8 @@ components:
       properties:
         id: { type: string, format: uuid }
         date: { type: string, format: date }
+        finish_time: { type: string, nullable: true, description: "Brewer's finish time", example: "2:38" }
+        brewer_note: { type: string, nullable: true, description: "What the brewer did this round" }
         tasters: { type: integer }
         avg_overall: { type: number, nullable: true }
         flavor: { $ref: "#/components/schemas/Flavor" }

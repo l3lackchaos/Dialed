@@ -65,6 +65,14 @@ export async function fetchSession(id: string): Promise<BrewLogWithRecipe> {
   ) as BrewLogWithRecipe;
 }
 
+export async function updateSession(
+  id: string,
+  payload: { actual_time?: string | null; brewer_note?: string | null },
+): Promise<void> {
+  const { error } = await supabase.from("brew_logs").update(payload).eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
 export async function deleteSession(id: string): Promise<void> {
   const { error } = await supabase.from("brew_logs").delete().eq("id", id);
   if (error) throw new Error(error.message);

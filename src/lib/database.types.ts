@@ -119,6 +119,7 @@ export type Database = {
           recipe_id: string;
           brew_date: string;
           actual_time: string | null;
+          brewer_note: string | null;
           click_setting: string | null;
           grinder: string | null;
           acidity: number | null;
@@ -137,6 +138,7 @@ export type Database = {
           recipe_id: string;
           brew_date?: string;
           actual_time?: string | null;
+          brewer_note?: string | null;
           click_setting?: string | null;
           grinder?: string | null;
           acidity?: number | null;

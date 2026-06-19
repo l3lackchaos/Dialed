@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { ChevronLeft, Share2, Plus, Trash2, Coffee, ChevronDown } from "lucide-react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { ChevronLeft, Share2, Plus, Trash2, Coffee, ChevronDown, Pencil, Timer } from "lucide-react";
 import { useT } from "../i18n";
 import { useQuery } from "../hooks/useQuery";
-import { fetchSession, fetchTastings, createTasting, deleteTasting } from "../lib/queries";
+import {
+  fetchSession, fetchTastings, createTasting, deleteTasting, updateSession, deleteSession,
+} from "../lib/queries";
 import { formatDate } from "../lib/format";
 import { PageLoader, EmptyState, Field, TextInput, TextArea, Spinner } from "../components/ui";
 import StarRating from "../components/StarRating";
 import FlavorRadar from "../components/FlavorRadar";
 import Modal from "../components/Modal";
+import ConfirmDialog from "../components/ConfirmDialog";
 import ShareSession from "../components/ShareSession";
 import { FLAVOR_AXES } from "../lib/constants";
 import LangToggle from "../components/LangToggle";
@@ -23,16 +26,43 @@ export default function Session() {
   const sessionQ = useQuery(() => fetchSession(id!));
   const session = sessionQ.data;
 
+  const navigate = useNavigate();
   const [tastings, setTastings] = useState<BrewComment[]>([]);
   const [loadingT, setLoadingT] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [noteOpen, setNoteOpen] = useState(false);
+  const [deletingRound, setDeletingRound] = useState(false);
+  const [busyDel, setBusyDel] = useState(false);
+  // Local copy of the brewer's note so the UI updates without a refetch.
+  const [actualTime, setActualTime] = useState<string | null>(null);
+  const [brewerNote, setBrewerNote] = useState<string | null>(null);
   const { notify } = useToast();
 
   useEffect(() => {
     if (!id) return;
     fetchTastings(id).then(setTastings).catch(() => {}).finally(() => setLoadingT(false));
   }, [id]);
+
+  useEffect(() => {
+    if (sessionQ.data) {
+      setActualTime(sessionQ.data.actual_time);
+      setBrewerNote(sessionQ.data.brewer_note);
+    }
+  }, [sessionQ.data]);
+
+  async function confirmDeleteRound() {
+    if (!session) return;
+    setBusyDel(true);
+    try {
+      await deleteSession(session.id);
+      notify(t("session.deleted"));
+      navigate(recipe ? `/r/${recipe.id}` : "/");
+    } catch (err) {
+      notify(err instanceof Error ? err.message : "", "error");
+      setBusyDel(false);
+    }
+  }
 
   async function remove(tid: string) {
     try {
@@ -88,6 +118,30 @@ export default function Session() {
               <button onClick={() => setShareOpen(true)} className="btn-ghost mt-4 w-full"><Share2 className="h-4 w-4" /> {t("session.shareCta")}</button>
             </div>
 
+            {/* Brewer's note */}
+            <div className="surface p-5">
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-cream-dim">{t("session.brewerNote")}</h2>
+                <button onClick={() => setNoteOpen(true)} className="flex h-9 items-center gap-1 text-sm font-medium text-gold">
+                  <Pencil className="h-4 w-4" /> {t("common.edit")}
+                </button>
+              </div>
+              {actualTime || brewerNote ? (
+                <div className="mt-2.5 space-y-2">
+                  {actualTime && (
+                    <p className="flex items-center gap-2 text-cream">
+                      <Timer className="h-4 w-4 text-gold" />
+                      <span className="text-sm text-cream-mute">{t("session.finishTime")}</span>
+                      <span className="font-semibold tnum">{actualTime}</span>
+                    </p>
+                  )}
+                  {brewerNote && <p className="leading-relaxed text-cream-dim">{brewerNote}</p>}
+                </div>
+              ) : (
+                <p className="mt-2 text-sm leading-relaxed text-cream-mute">{t("session.noteEmpty")}</p>
+              )}
+            </div>
+
             {/* Average */}
             {avg != null && (
               <div className="flex items-center justify-center gap-3 rounded-2xl bg-gold/10 py-4">
@@ -124,6 +178,13 @@ export default function Session() {
                 </ul>
               )}
             </section>
+
+            <button
+              onClick={() => setDeletingRound(true)}
+              className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-xl border border-danger/30 text-sm font-semibold text-danger transition-colors hover:bg-danger/10 active:scale-[0.98]"
+            >
+              <Trash2 className="h-4 w-4" /> {t("session.deleteRound")}
+            </button>
           </div>
         )}
       </main>
@@ -132,9 +193,87 @@ export default function Session() {
         <>
           <TastingForm open={formOpen} sessionId={session.id} onClose={() => setFormOpen(false)} onSaved={(c) => setTastings((x) => [...x, c])} />
           <ShareSession open={shareOpen} onClose={() => setShareOpen(false)} logId={session.id} title={recipe?.name ?? t("session.title")} />
+          <BrewerNoteForm
+            open={noteOpen}
+            sessionId={session.id}
+            initialTime={actualTime ?? ""}
+            initialNote={brewerNote ?? ""}
+            onClose={() => setNoteOpen(false)}
+            onSaved={(time, note) => { setActualTime(time || null); setBrewerNote(note || null); }}
+          />
+          <ConfirmDialog
+            open={deletingRound}
+            title={t("session.deleteTitle")}
+            message={t("session.deleteMsg")}
+            busy={busyDel}
+            onCancel={() => setDeletingRound(false)}
+            onConfirm={confirmDeleteRound}
+          />
         </>
       )}
     </div>
+  );
+}
+
+function BrewerNoteForm({
+  open, sessionId, initialTime, initialNote, onClose, onSaved,
+}: {
+  open: boolean;
+  sessionId: string;
+  initialTime: string;
+  initialNote: string;
+  onClose: () => void;
+  onSaved: (time: string, note: string) => void;
+}) {
+  const t = useT();
+  const { notify } = useToast();
+  const [time, setTime] = useState("");
+  const [note, setNote] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const [wasOpen, setWasOpen] = useState(false);
+  if (open && !wasOpen) {
+    setTime(initialTime);
+    setNote(initialNote);
+    setWasOpen(true);
+  }
+  if (!open && wasOpen) setWasOpen(false);
+
+  async function save() {
+    setSaving(true);
+    try {
+      await updateSession(sessionId, { actual_time: time || null, brewer_note: note || null });
+      notify(t("session.noteSaved"));
+      onSaved(time, note);
+      onClose();
+    } catch (err) {
+      notify(err instanceof Error ? err.message : "", "error");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={t("session.brewerNote")}
+      footer={
+        <>
+          <button className="btn-quiet flex-1" onClick={onClose} disabled={saving}>{t("common.cancel")}</button>
+          <button className="btn-primary flex-[2]" onClick={save} disabled={saving}>{saving ? t("common.saving") : t("common.save")}</button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <Field label={t("session.finishTime")} optionalText={t("common.optional")}>
+          <TextInput value={time} onChange={(e) => setTime(e.target.value)} placeholder={t("session.finishPlaceholder")} inputMode="numeric" autoFocus />
+        </Field>
+        <Field label={t("session.whatYouDid")} optionalText={t("common.optional")}>
+          <TextArea value={note} onChange={(e) => setNote(e.target.value)} placeholder={t("session.notePlaceholder")} />
+        </Field>
+      </div>
+    </Modal>
   );
 }
 
