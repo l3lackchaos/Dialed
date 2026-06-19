@@ -33,6 +33,11 @@ export async function updateRecipe(id: string, payload: Partial<RecipeInsert>): 
   return unwrap(await supabase.from("recipes").update(payload).eq("id", id).select().single());
 }
 
+export async function setRecipeFinished(id: string, finished: boolean): Promise<void> {
+  const { error } = await supabase.from("recipes").update({ finished }).eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
 export async function deleteRecipe(id: string): Promise<void> {
   const { error } = await supabase.from("recipes").delete().eq("id", id);
   if (error) throw new Error(error.message);

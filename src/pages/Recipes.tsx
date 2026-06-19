@@ -51,6 +51,8 @@ export default function Recipes() {
   }
 
   const hasRecipes = recipes && recipes.length > 0;
+  // Active coffees first, finished ones sink to the bottom.
+  const sorted = recipes ? [...recipes].sort((a, b) => Number(a.finished) - Number(b.finished)) : [];
 
   return (
     <div className="animate-fade-up">
@@ -93,7 +95,7 @@ export default function Recipes() {
         />
       ) : (
         <ul className={`space-y-3 ${selecting && picked.size > 0 ? "pb-20" : ""}`}>
-          {recipes!.map((r) => {
+          {sorted.map((r) => {
             const checked = picked.has(r.id);
             return (
               <li key={r.id}>
@@ -108,8 +110,13 @@ export default function Recipes() {
                       ? <CheckCircle2 className="h-6 w-6 shrink-0 text-gold" />
                       : <Circle className="h-6 w-6 shrink-0 text-cream-mute" />
                   )}
-                  <div className="min-w-0 flex-1">
-                    <h2 className="truncate text-lg font-semibold text-cream">{r.name}</h2>
+                  <div className={`min-w-0 flex-1 ${r.finished ? "opacity-55" : ""}`}>
+                    <div className="flex items-center gap-2">
+                      <h2 className={`truncate text-lg font-semibold text-cream ${r.finished ? "line-through" : ""}`}>{r.name}</h2>
+                      {r.finished && (
+                        <span className="shrink-0 rounded-full bg-espresso-700 px-2 py-0.5 text-xs font-medium text-cream-dim">{t("recipes.finished")}</span>
+                      )}
+                    </div>
                     {r.bean_label && <p className="mt-0.5 truncate text-sm text-gold">{r.bean_label}</p>}
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-cream-dim tnum">
                       {r.ratio && <span className="font-semibold text-cream">{r.ratio}</span>}

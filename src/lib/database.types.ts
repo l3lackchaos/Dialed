@@ -56,6 +56,7 @@ export type Database = {
           target_time: string | null;
           notes: string | null;
           is_favorite: boolean;
+          finished: boolean;
         };
         Insert: {
           id?: string;
@@ -74,6 +75,7 @@ export type Database = {
           target_time?: string | null;
           notes?: string | null;
           is_favorite?: boolean;
+          finished?: boolean;
         };
         Update: Partial<Database["public"]["Tables"]["recipes"]["Insert"]>;
         Relationships: [];

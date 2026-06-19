@@ -72,6 +72,7 @@ function compact(r: any) {
     grinder: r.grinder, clicks: r.click_setting, water_temp: r.water_temp,
     dose_g: r.dose_g, water_g: r.water_g, ratio: r.ratio,
     target_time: r.target_time, notes: r.notes, pour_schedule: r.pour_schedule,
+    finished: r.finished ?? false,
   };
 }
 
@@ -93,6 +94,7 @@ function toRow(b: any) {
     target_time: b.target_time ?? b.target ?? null,
     notes: b.notes ?? null,
     pour_schedule: Array.isArray(b.pour_schedule) ? b.pour_schedule : [],
+    finished: b.finished === true,
   };
 }
 
@@ -110,6 +112,7 @@ function toPatch(b: any) {
   if ("target_time" in b || "target" in b) p.target_time = b.target_time ?? b.target ?? null;
   if ("notes" in b) p.notes = b.notes ?? null;
   if ("pour_schedule" in b) p.pour_schedule = Array.isArray(b.pour_schedule) ? b.pour_schedule : [];
+  if ("finished" in b) p.finished = b.finished === true;
   if ("ratio" in b) p.ratio = b.ratio;
   if (typeof p.dose_g === "number" && typeof p.water_g === "number") {
     p.ratio = `1:${((p.water_g as number) / (p.dose_g as number)).toFixed(1)}`;

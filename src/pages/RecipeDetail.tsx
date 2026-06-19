@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ChevronLeft, Pencil, Trash2, Plus, ChevronRight, Coffee } from "lucide-react";
+import { ChevronLeft, Pencil, Trash2, Plus, ChevronRight, Coffee, PackageX, RotateCcw } from "lucide-react";
 import { useT } from "../i18n";
 import { useQuery } from "../hooks/useQuery";
 import {
-  fetchRecipe, fetchSessionsForRecipe, createSession, deleteRecipe,
+  fetchRecipe, fetchSessionsForRecipe, createSession, deleteRecipe, setRecipeFinished,
 } from "../lib/queries";
 import { parsePourSchedule, formatDate } from "../lib/format";
 import { PageLoader, EmptyState } from "../components/ui";
@@ -38,6 +38,17 @@ export default function RecipeDetail() {
     } catch (err) {
       notify(err instanceof Error ? err.message : "", "error");
       setStarting(false);
+    }
+  }
+
+  async function toggleFinished() {
+    if (!recipe) return;
+    try {
+      await setRecipeFinished(recipe.id, !recipe.finished);
+      notify(t(recipe.finished ? "recipes.availableToast" : "recipes.finishedToast"));
+      recipeQ.refetch();
+    } catch (err) {
+      notify(err instanceof Error ? err.message : "", "error");
     }
   }
 
@@ -77,15 +88,30 @@ export default function RecipeDetail() {
         ) : (
           <div className="animate-fade-up space-y-6">
             {/* Title */}
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <h1 className="text-2xl font-semibold text-cream">{recipe.name}</h1>
-                {recipe.bean_label && <p className="mt-0.5 text-gold">{recipe.bean_label}</p>}
+            <div>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h1 className={`text-2xl font-semibold text-cream ${recipe.finished ? "line-through opacity-60" : ""}`}>{recipe.name}</h1>
+                    {recipe.finished && (
+                      <span className="shrink-0 rounded-full bg-espresso-700 px-2.5 py-0.5 text-xs font-medium text-cream-dim">{t("recipes.finished")}</span>
+                    )}
+                  </div>
+                  {recipe.bean_label && <p className="mt-0.5 text-gold">{recipe.bean_label}</p>}
+                </div>
+                <div className="flex shrink-0">
+                  <Link to={`/r/${recipe.id}/edit`} className="flex h-10 w-10 items-center justify-center text-cream-mute hover:text-gold" aria-label={t("common.edit")}><Pencil className="h-4 w-4" /></Link>
+                  <button onClick={() => setDeleting(true)} className="flex h-10 w-10 items-center justify-center text-cream-mute hover:text-danger" aria-label={t("common.delete")}><Trash2 className="h-4 w-4" /></button>
+                </div>
               </div>
-              <div className="flex shrink-0">
-                <Link to={`/r/${recipe.id}/edit`} className="flex h-10 w-10 items-center justify-center text-cream-mute hover:text-gold" aria-label={t("common.edit")}><Pencil className="h-4 w-4" /></Link>
-                <button onClick={() => setDeleting(true)} className="flex h-10 w-10 items-center justify-center text-cream-mute hover:text-danger" aria-label={t("common.delete")}><Trash2 className="h-4 w-4" /></button>
-              </div>
+              <button
+                onClick={toggleFinished}
+                className={`mt-3 w-full ${recipe.finished ? "btn-primary" : "btn-ghost"}`}
+              >
+                {recipe.finished
+                  ? <><RotateCcw className="h-4 w-4" /> {t("recipes.markAvailable")}</>
+                  : <><PackageX className="h-4 w-4" /> {t("recipes.markFinished")}</>}
+              </button>
             </div>
 
             {/* How to brew */}

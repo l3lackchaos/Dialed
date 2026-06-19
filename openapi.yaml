@@ -138,6 +138,7 @@ components:
         ratio: { type: string, nullable: true, example: "1:16.7" }
         target_time: { type: string, nullable: true, example: "2:30" }
         notes: { type: string, nullable: true }
+        finished: { type: boolean, description: "Coffee is used up / out of stock" }
         pour_schedule:
           type: array
           items: { $ref: "#/components/schemas/PourStep" }
@@ -157,6 +158,7 @@ components:
         water: { type: number, example: 250 }
         target_time: { type: string, example: "2:30" }
         notes: { type: string }
+        finished: { type: boolean, description: "Mark the coffee as used up" }
         pour_schedule:
           type: array
           items: { $ref: "#/components/schemas/PourStep" }
