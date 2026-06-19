@@ -1,0 +1,210 @@
+openapi: 3.1.0
+info:
+  title: Dialed Recipes API
+  version: "1.0.0"
+  description: >
+    Add, read, update and delete pour-over recipes, and read tasting results.
+    Built so an external agent (e.g. a Claude pour-over skill) can manage recipes.
+servers:
+  - url: https://ohbepgrcinhjdvweuwym.supabase.co/functions/v1
+    description: Production (Supabase Edge Function)
+security:
+  - apiKeyAuth: []
+paths:
+  /recipes:
+    get:
+      summary: List recipes, or get one recipe with tasting results
+      description: >
+        With no query params, returns all recipes. With `id`, returns that recipe
+        plus its tasting summary and per-round breakdown.
+      parameters:
+        - $ref: "#/components/parameters/IdQuery"
+      responses:
+        "200":
+          description: A recipe list, or one recipe with results
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/RecipeList"
+                  - $ref: "#/components/schemas/RecipeDetail"
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    post:
+      summary: Create a recipe
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RecipeInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CreateResponse" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    patch:
+      summary: Update a recipe (partial)
+      parameters:
+        - $ref: "#/components/parameters/IdQueryRequired"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RecipePatch" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CreateResponse" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    delete:
+      summary: Delete a recipe
+      parameters:
+        - $ref: "#/components/parameters/IdQueryRequired"
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  deleted: { type: string, format: uuid }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+components:
+  securitySchemes:
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+  parameters:
+    IdQuery:
+      name: id
+      in: query
+      required: false
+      schema: { type: string, format: uuid }
+    IdQueryRequired:
+      name: id
+      in: query
+      required: true
+      schema: { type: string, format: uuid }
+  responses:
+    Unauthorized:
+      description: Missing or wrong x-api-key
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    NotFound:
+      description: Recipe not found
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+  schemas:
+    Error:
+      type: object
+      properties:
+        error: { type: string }
+    PourStep:
+      type: object
+      properties:
+        pour: { type: string, example: "Bloom" }
+        cumulative_g: { type: string, example: "50" }
+        time: { type: string, example: "0:00" }
+        note: { type: string, example: "swirl" }
+    Recipe:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        bean: { type: string, nullable: true }
+        dripper: { type: string, nullable: true }
+        grinder: { type: string, nullable: true }
+        clicks: { type: string, nullable: true }
+        water_temp: { type: number, nullable: true }
+        dose_g: { type: number, nullable: true }
+        water_g: { type: number, nullable: true }
+        ratio: { type: string, nullable: true, example: "1:16.7" }
+        target_time: { type: string, nullable: true, example: "2:30" }
+        notes: { type: string, nullable: true }
+        pour_schedule:
+          type: array
+          items: { $ref: "#/components/schemas/PourStep" }
+    RecipeInput:
+      type: object
+      required: [name]
+      description: Friendly aliases accepted; `ratio` is computed from dose + water.
+      properties:
+        name: { type: string }
+        bean: { type: string }
+        dripper: { type: string }
+        grinder: { type: string }
+        clicks: { type: string, example: "22 clicks" }
+        water_temp: { type: number, example: 92 }
+        temp: { type: number, description: "Alias of water_temp" }
+        dose: { type: number, example: 15 }
+        water: { type: number, example: 250 }
+        target_time: { type: string, example: "2:30" }
+        notes: { type: string }
+        pour_schedule:
+          type: array
+          items: { $ref: "#/components/schemas/PourStep" }
+    RecipePatch:
+      allOf:
+        - $ref: "#/components/schemas/RecipeInput"
+      description: Same fields as RecipeInput, all optional.
+      required: []
+    Flavor:
+      type: object
+      properties:
+        acidity: { type: number, nullable: true }
+        body: { type: number, nullable: true }
+        sweetness: { type: number, nullable: true }
+        bitterness: { type: number, nullable: true }
+        clarity: { type: number, nullable: true }
+    RecipeList:
+      type: object
+      properties:
+        recipes:
+          type: array
+          items: { $ref: "#/components/schemas/Recipe" }
+    CreateResponse:
+      type: object
+      properties:
+        ok: { type: boolean }
+        recipe: { $ref: "#/components/schemas/Recipe" }
+        view_url: { type: string, format: uri }
+    Round:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        date: { type: string, format: date }
+        tasters: { type: integer }
+        avg_overall: { type: number, nullable: true }
+        flavor: { $ref: "#/components/schemas/Flavor" }
+    RecipeDetail:
+      type: object
+      properties:
+        recipe: { $ref: "#/components/schemas/Recipe" }
+        view_url: { type: string, format: uri }
+        summary:
+          type: object
+          properties:
+            rounds: { type: integer }
+            total_tastings: { type: integer }
+            avg_overall: { type: number, nullable: true }
+            flavor: { $ref: "#/components/schemas/Flavor" }
+        rounds:
+          type: array
+          items: { $ref: "#/components/schemas/Round" }

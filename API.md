@@ -62,6 +62,24 @@ from `dose` + `water`):
 ```
 → `201 { "ok": true, "recipe": { … }, "view_url": "https://dialedcoff.bar/r/<id>" }`
 
+### Update a recipe (partial)
+```
+PATCH /functions/v1/recipes?id=<uuid>
+Content-Type: application/json
+```
+Send only the fields you want to change (same aliases as create; `ratio`
+re-computed if you change `dose`/`water`):
+```json
+{ "water_temp": 90, "notes": "Cooler for less bitterness." }
+```
+→ `200 { "ok": true, "recipe": { … }, "view_url": "…" }`
+
+### Delete a recipe
+```
+DELETE /functions/v1/recipes?id=<uuid>
+```
+→ `200 { "ok": true, "deleted": "<uuid>" }`
+
 ### Get one recipe + tasting results
 ```
 GET /functions/v1/recipes?id=<uuid>
@@ -99,6 +117,19 @@ curl -s -X POST "$BASE" -H "x-api-key: $KEY" -H "content-type: application/json"
 
 # results for one recipe
 curl -s "$BASE?id=<uuid>" -H "x-api-key: $KEY"
+```
+
+## OpenAPI
+
+A machine-readable spec is at [`openapi.yaml`](openapi.yaml) — hand it to an
+agent (or import into Postman/Swagger) so it knows every endpoint and schema.
+
+```bash
+# update + delete examples
+curl -s -X PATCH "$BASE?id=<uuid>" -H "x-api-key: $KEY" -H "content-type: application/json" \
+  -d '{"water_temp":90,"notes":"cooler"}'
+
+curl -s -X DELETE "$BASE?id=<uuid>" -H "x-api-key: $KEY"
 ```
 
 ## Notes

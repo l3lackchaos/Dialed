@@ -26,7 +26,7 @@ const APP_URL = Deno.env.get("APP_URL") ?? "https://dialedcoff.bar";
 const cors: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-api-key, content-type",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, POST, PATCH, PUT, DELETE, OPTIONS",
 };
 
 const FLAVOR = ["acidity", "body", "sweetness", "bitterness", "clarity"] as const;
@@ -94,6 +94,27 @@ function toRow(b: any) {
   };
 }
 
+// deno-lint-ignore no-explicit-any
+function toPatch(b: any) {
+  const p: Record<string, unknown> = {};
+  if ("name" in b) p.name = String(b.name).trim();
+  if ("bean" in b || "bean_label" in b) p.bean_label = b.bean ?? b.bean_label ?? null;
+  if ("dripper" in b) p.dripper = b.dripper ?? null;
+  if ("grinder" in b) p.grinder = b.grinder ?? null;
+  if ("clicks" in b || "click_setting" in b) p.click_setting = b.clicks ?? b.click_setting ?? null;
+  if ("water_temp" in b || "temp" in b) p.water_temp = num(b.water_temp ?? b.temp);
+  if ("dose" in b || "dose_g" in b) p.dose_g = num(b.dose ?? b.dose_g);
+  if ("water" in b || "water_g" in b) p.water_g = num(b.water ?? b.water_g);
+  if ("target_time" in b || "target" in b) p.target_time = b.target_time ?? b.target ?? null;
+  if ("notes" in b) p.notes = b.notes ?? null;
+  if ("pour_schedule" in b) p.pour_schedule = Array.isArray(b.pour_schedule) ? b.pour_schedule : [];
+  if ("ratio" in b) p.ratio = b.ratio;
+  if (typeof p.dose_g === "number" && typeof p.water_g === "number") {
+    p.ratio = `1:${((p.water_g as number) / (p.dose_g as number)).toFixed(1)}`;
+  }
+  return p;
+}
+
 async function recipeDetail(id: string) {
   const recipes = await db(`recipes?id=eq.${id}&select=*`);
   if (!recipes.length) throw new Error("Recipe not found");
@@ -156,6 +177,25 @@ Deno.serve(async (req) => {
       });
       const recipe = compact(created[0]);
       return json({ ok: true, recipe, view_url: `${APP_URL}/r/${created[0].id}` }, 201);
+    }
+
+    if (req.method === "PATCH" || req.method === "PUT") {
+      if (!id) return json({ error: "Query param 'id' is required" }, 400);
+      const body = await req.json().catch(() => null);
+      if (!body) return json({ error: "JSON body is required" }, 400);
+      const updated = await db(`recipes?id=eq.${id}&select=*`, {
+        method: "PATCH",
+        headers: { Prefer: "return=representation" },
+        body: JSON.stringify(toPatch(body)),
+      });
+      if (!updated.length) return json({ error: "Recipe not found" }, 404);
+      return json({ ok: true, recipe: compact(updated[0]), view_url: `${APP_URL}/r/${id}` });
+    }
+
+    if (req.method === "DELETE") {
+      if (!id) return json({ error: "Query param 'id' is required" }, 400);
+      await db(`recipes?id=eq.${id}`, { method: "DELETE" });
+      return json({ ok: true, deleted: id });
     }
 
     return json({ error: "Method not allowed" }, 405);
