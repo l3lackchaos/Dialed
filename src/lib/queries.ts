@@ -38,6 +38,12 @@ export async function deleteRecipe(id: string): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
+export async function deleteRecipes(ids: string[]): Promise<void> {
+  if (!ids.length) return;
+  const { error } = await supabase.from("recipes").delete().in("id", ids);
+  if (error) throw new Error(error.message);
+}
+
 /* ----------------------- Tasting sessions (brew_logs) ----------------------- */
 
 export type SessionSummary = BrewLog & { tasting_count: number; avg_overall: number | null };

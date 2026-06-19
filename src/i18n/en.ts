@@ -30,6 +30,10 @@ export const en = {
   "common.post": "Post",
   "common.remove": "Remove",
   "common.loading": "Loading…",
+  "common.select": "Select",
+  "common.selectAll": "All",
+  "common.selectedN": "{n} selected",
+  "common.deleteN": "Delete {n}",
 
   // Recipes
   "recipes.title": "Recipes",
@@ -66,6 +70,9 @@ export const en = {
   "recipes.errName": "Recipe name is required",
   "recipes.deleteTitle": "Delete recipe?",
   "recipes.deleteMsg": "“{name}” and its tasting rounds will be permanently deleted.",
+  "recipes.bulkDeleteTitle": "Delete {n} recipes?",
+  "recipes.bulkDeleteMsg": "The selected recipes and their tasting rounds will be permanently deleted.",
+  "recipes.bulkDeleted": "Deleted {n} recipes",
   "recipes.howTo": "How to brew",
   "recipes.brewIt": "Start a tasting round",
   "recipes.rounds": "Tasting rounds",
