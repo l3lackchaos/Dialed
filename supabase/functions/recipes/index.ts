@@ -23,10 +23,12 @@ const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const API_KEY = Deno.env.get("RECIPES_API_KEY") ?? "set-RECIPES_API_KEY-secret";
 const APP_URL = Deno.env.get("APP_URL") ?? "https://dialedcoff.bar";
 
+// CORS — applied to every response (success, errors, and the OPTIONS preflight).
 const cors: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-api-key, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-api-key, apikey, content-type",
   "Access-Control-Allow-Methods": "GET, POST, PATCH, PUT, DELETE, OPTIONS",
+  "Access-Control-Max-Age": "86400",
 };
 
 const FLAVOR = ["acidity", "body", "sweetness", "bitterness", "clarity"] as const;
@@ -152,7 +154,8 @@ async function recipeDetail(id: string) {
 }
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
+  // Preflight: answer before auth so browsers can complete the CORS handshake.
+  if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
   if ((req.headers.get("x-api-key") ?? "") !== API_KEY) {
     return json({ error: "Unauthorized — set header x-api-key" }, 401);
   }
